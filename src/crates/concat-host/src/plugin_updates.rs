@@ -845,7 +845,9 @@ mod tests {
             entry("yumo.volume", 2, 2, "0.2.11"),
             entry("other.new", 2, 2, "0.2.11"),
         ];
-        let result = offer(release("0.2.12"), entries, temp.path());
+        let current = Version::current();
+        let newer = Version::new(current.major + 1, 0, 0).to_string();
+        let result = offer(release(&newer), entries, temp.path());
         assert!(result.app);
         let candidates = result.candidates();
         assert_eq!(candidates.len(), 1);

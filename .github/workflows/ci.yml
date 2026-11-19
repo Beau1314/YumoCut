@@ -63,6 +63,9 @@ jobs:
       # the two saying the same thing. See models/manifest.toml.
       - run: python3 scripts/models.py --check
         if: ${{ !cancelled() }}
+      - name: Update tooling tests
+        run: python3 -m unittest scripts.ci.test_unpack_onnxruntime scripts.test_plugin_updates
+        if: ${{ !cancelled() }}
 
   engine:
     name: Engine tests and lints
@@ -132,10 +135,9 @@ jobs:
         run: |
           set -euo pipefail
           stem="onnxruntime-linux-x64-$ORT_VERSION"
-          scripts/ci/fetch.sh onnxruntime-linux-x64 onnxruntime.tgz
-          tar -xzf onnxruntime.tgz
-          test -f "$stem/lib/libonnxruntime.so.$ORT_VERSION"
-          ln -sf "libonnxruntime.so.$ORT_VERSION" "$stem/lib/libonnxruntime.so"
+          scripts/ci/fetch.sh onnxruntime-linux-x64 onnxruntime.nupkg
+          python3 scripts/ci/unpack_onnxruntime.py onnxruntime.nupkg linux-x64 "$stem"
+          test -f "$stem/lib/libonnxruntime.so"
           {
             echo "ORT_LIB_LOCATION=$PWD/$stem/lib"
             echo "ORT_PREFER_DYNAMIC_LINK=1"
@@ -337,10 +339,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          & "$env:ProgramFiles\Git\bin\bash.exe" scripts/ci/fetch.sh onnxruntime-win-x64 onnxruntime.zip
+          & "$env:ProgramFiles\Git\bin\bash.exe" scripts/ci/fetch.sh onnxruntime-win-x64 onnxruntime.nupkg
           if ($LASTEXITCODE -ne 0) { throw "the ONNX Runtime download failed" }
-          Expand-Archive onnxruntime.zip -DestinationPath .
-          $lib = "$PWD\onnxruntime-win-x64-$env:ORT_VERSION\lib"
+          $dir = "$PWD\onnxruntime-win-x64-$env:ORT_VERSION"
+          python3 scripts/ci/unpack_onnxruntime.py onnxruntime.nupkg win-x64 $dir
+          if ($LASTEXITCODE -ne 0) { throw "the ONNX Runtime unpack failed" }
+          $lib = "$dir\lib"
           if (-not (Test-Path "$lib\onnxruntime.lib")) { throw "$lib\onnxruntime.lib is not there" }
           "ORT_LIB_LOCATION=$lib" | Out-File -FilePath $env:GITHUB_ENV -Append
           "ORT_PREFER_DYNAMIC_LINK=1" | Out-File -FilePath $env:GITHUB_ENV -Append

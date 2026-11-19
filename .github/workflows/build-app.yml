@@ -262,12 +262,9 @@ jobs:
         run: |
           set -euo pipefail
           stem="onnxruntime-linux-${{ matrix.ort }}-$ORT_VERSION"
-          scripts/ci/fetch.sh "onnxruntime-linux-${{ matrix.ort }}" onnxruntime.tgz
-          tar -xzf onnxruntime.tgz
-          test -f "$stem/lib/libonnxruntime.so.$ORT_VERSION"
-          # The tarball carries the soname and the full version; the linker
-          # asks for the bare name.
-          ln -sf "libonnxruntime.so.$ORT_VERSION" "$stem/lib/libonnxruntime.so"
+          scripts/ci/fetch.sh "onnxruntime-linux-${{ matrix.ort }}" onnxruntime.nupkg
+          python3 scripts/ci/unpack_onnxruntime.py onnxruntime.nupkg "linux-${{ matrix.ort }}" "$stem"
+          test -f "$stem/lib/libonnxruntime.so"
           {
             echo "ORT_LIB_LOCATION=$PWD/$stem/lib"
             echo "ORT_PREFER_DYNAMIC_LINK=1"
@@ -446,10 +443,11 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          & "$env:ProgramFiles\Git\bin\bash.exe" scripts/ci/fetch.sh "onnxruntime-${{ matrix.ort }}" onnxruntime.zip
+          & "$env:ProgramFiles\Git\bin\bash.exe" scripts/ci/fetch.sh "onnxruntime-${{ matrix.ort }}" onnxruntime.nupkg
           if ($LASTEXITCODE -ne 0) { throw "the ONNX Runtime download failed" }
-          Expand-Archive onnxruntime.zip -DestinationPath .
           $dir = "$PWD\onnxruntime-${{ matrix.ort }}-$env:ORT_VERSION"
+          python3 scripts/ci/unpack_onnxruntime.py onnxruntime.nupkg "${{ matrix.ort }}" $dir
+          if ($LASTEXITCODE -ne 0) { throw "the ONNX Runtime unpack failed" }
           if (-not (Test-Path "$dir\lib\onnxruntime.lib")) { throw "$dir\lib\onnxruntime.lib is not there" }
           if (-not (Test-Path "$dir\lib\onnxruntime.dll")) { throw "$dir\lib\onnxruntime.dll is not there" }
           "ORT_LIB_LOCATION=$dir\lib" | Out-File -FilePath $env:GITHUB_ENV -Append

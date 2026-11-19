@@ -32,6 +32,10 @@ def unpack(source: Path, runtime: str, output: Path) -> None:
             destination.write_bytes(archive.read(member))
             if runtime.startswith("linux-"):
                 destination.chmod(0o755)
+                if destination.name == "libonnxruntime.so":
+                    # The NuGet file's SONAME is libonnxruntime.so.1. A hard
+                    # link satisfies the loader without Windows symlink rights.
+                    (library / "libonnxruntime.so.1").hardlink_to(destination)
 
 
 def main() -> None:

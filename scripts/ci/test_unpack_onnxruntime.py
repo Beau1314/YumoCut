@@ -33,8 +33,13 @@ class UnpackTests(unittest.TestCase):
                 source.write_bytes(package(runtime))
                 output = root / "output"
                 unpack_onnxruntime.unpack(source, runtime, output)
-                expected = {"onnxruntime.dll", "onnxruntime.lib"} if runtime.startswith("win-") else {"libonnxruntime.so"}
+                expected = {"onnxruntime.dll", "onnxruntime.lib"} if runtime.startswith("win-") else {"libonnxruntime.so", "libonnxruntime.so.1"}
                 self.assertEqual({path.name for path in (output / "lib").iterdir()}, expected)
+                if runtime.startswith("linux-"):
+                    self.assertEqual(
+                        (output / "lib/libonnxruntime.so.1").read_bytes(),
+                        (output / "lib/libonnxruntime.so").read_bytes(),
+                    )
 
     def test_rejects_an_incomplete_runtime(self):
         with tempfile.TemporaryDirectory() as directory:

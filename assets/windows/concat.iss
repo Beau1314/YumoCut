@@ -1,12 +1,12 @@
-; Concat's Windows installer.
+; YumoCut's Windows installer.
 ;
 ; Built by build-app.yml with Inno Setup from the staged folder the .msi
 ; is also made of, so the two ship the same files; this is the one a
-; person double-clicks, and it puts Concat in the Start menu and can take
+; person double-clicks, and it puts YumoCut in the Start menu and can take
 ; it out again. Everything it needs is handed in on the command line:
 ;
 ;   iscc /DVersion=0.2.11 /DArch=x64compatible /DSuffix=x86_64 ^
-;        /DStage=C:\...\stage\Concat-0.2.11-windows-x86_64 /DOut=C:\...\stage ^
+;        /DStage=C:\...\stage\YumoCut-0.2.11-windows-x86_64 /DOut=C:\...\stage ^
 ;        assets\windows\concat.iss
 ;
 ; Arch is Inno's own word for the machine: x64compatible for the x86_64
@@ -30,25 +30,25 @@
 #endif
 
 [Setup]
-; One id for the life of the product, so an install over an older one is
-; an upgrade and not a second copy.
-AppId={{7B1E5C3A-3B9E-4F0B-9C6D-2F1D0C0A0C47}
-AppName=Concat
+; One id for the life of YumoCut, independent of upstream Concat, so an
+; install over an older YumoCut is an upgrade and not a second copy.
+AppId={{4C7A91E2-6D38-4B5F-A209-8E74C31D9A62}
+AppName=YumoCut
 AppVersion={#Version}
-AppVerName=Concat {#Version}
-AppPublisher=Concat contributors
-AppPublisherURL=https://github.com/jub0t/Concat
-AppSupportURL=https://github.com/jub0t/Concat/issues
-AppUpdatesURL=https://github.com/jub0t/Concat/releases
-DefaultDirName={autopf}\Concat
-DefaultGroupName=Concat
+AppVerName=YumoCut {#Version}
+AppPublisher=YumoCut contributors
+AppPublisherURL=https://github.com/Beau1314/YumoCut
+AppSupportURL=https://github.com/Beau1314/YumoCut/issues
+AppUpdatesURL=https://github.com/Beau1314/YumoCut/releases
+DefaultDirName={autopf}\YumoCut
+DefaultGroupName=YumoCut
 DisableProgramGroupPage=yes
 LicenseFile=..\..\LICENSE
 OutputDir={#Out}
-OutputBaseFilename=Concat-{#Version}-windows-{#Suffix}-setup
-SetupIconFile=..\icons\concat.ico
-UninstallDisplayIcon={app}\concat.ico
-UninstallDisplayName=Concat
+OutputBaseFilename=YumoCut-{#Version}-windows-{#Suffix}-setup
+SetupIconFile=..\icons\yumocut.ico
+UninstallDisplayIcon={app}\yumocut.ico
+UninstallDisplayName=YumoCut
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -105,14 +105,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#Stage}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\icons\concat.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\icons\yumocut.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\Concat"; Filename: "{app}\concat.exe"; IconFilename: "{app}\concat.ico"
+Name: "{autoprograms}\YumoCut"; Filename: "{app}\concat.exe"; IconFilename: "{app}\yumocut.ico"
 ; The way in when a graphics driver draws the window as coloured squares:
 ; it turns off Settings > General > Draw on the GPU, which that window hides.
-Name: "{autoprograms}\Concat (safe graphics)"; Filename: "{app}\concat.exe"; Parameters: "--software"; IconFilename: "{app}\concat.ico"
-Name: "{autodesktop}\Concat"; Filename: "{app}\concat.exe"; IconFilename: "{app}\concat.ico"; Tasks: desktopicon
+Name: "{autoprograms}\YumoCut (safe graphics)"; Filename: "{app}\concat.exe"; Parameters: "--software"; IconFilename: "{app}\yumocut.ico"
+Name: "{autodesktop}\YumoCut"; Filename: "{app}\concat.exe"; IconFilename: "{app}\yumocut.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\concat.exe"; Description: "{cm:LaunchProgram,Concat}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\concat.exe"; Description: "{cm:LaunchProgram,YumoCut}"; Flags: nowait postinstall skipifsilent

@@ -34,7 +34,7 @@ use crate::dirs::AppDirs;
 use crate::models;
 
 /// The repository the releases are read from.
-pub const REPO: &str = "jub0t/Concat";
+pub const REPO: &str = "Beau1314/YumoCut";
 
 /// The first release with a Version page: the earliest one a person can
 /// come back from, so the earliest one offered.
@@ -42,7 +42,11 @@ pub const FIRST_SWITCHABLE: Version = Version::new(0, 2, 5);
 
 /// GitHub's list of the repository's releases, newest first. A hundred
 /// covers years of releases at this pace.
-const RELEASES_URL: &str = "https://api.github.com/repos/jub0t/Concat/releases?per_page=100";
+const RELEASES_PATH: &str = "/releases?per_page=100";
+
+pub fn releases_url() -> String {
+    format!("https://api.github.com/repos/{REPO}{RELEASES_PATH}")
+}
 
 /// What a download that was stopped says.
 pub const CANCELLED: &str = "the download was cancelled";
@@ -173,7 +177,7 @@ fn github_message(value: &serde_json::Value) -> String {
 
 /// Asks GitHub for the releases; see [`releases_from_json`].
 pub fn fetch_releases() -> Result<Vec<Release>, String> {
-    releases_from_json(&get_text(RELEASES_URL)?)
+    releases_from_json(&get_text(&releases_url())?)
 }
 
 /// Where this build sits among the releases.
@@ -710,8 +714,8 @@ fn detach(command: &mut Command) -> Result<(), String> {
 
 /// One GET, read whole as text. GitHub wants a user agent and says so with
 /// a 403 otherwise.
-fn get_text(url: &str) -> Result<String, String> {
-    let agent = format!("Concat/{}", Version::current());
+pub(crate) fn get_text(url: &str) -> Result<String, String> {
+    let agent = format!("YumoCut/{}", Version::current());
     let response = crate::net::get(
         url,
         std::time::Duration::from_secs(20),
@@ -756,6 +760,19 @@ fn get_text(url: &str) -> Result<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn yumocut_is_the_single_release_source() {
+        assert_eq!(REPO, "Beau1314/YumoCut");
+        assert_eq!(
+            releases_url(),
+            "https://api.github.com/repos/Beau1314/YumoCut/releases?per_page=100"
+        );
+        assert_eq!(
+            manifest_url("v0.2.12"),
+            "https://github.com/Beau1314/YumoCut/releases/download/v0.2.12/manifest.json"
+        );
+    }
 
     #[test]
     fn a_version_reads_a_tag_and_orders_by_its_numbers() {
@@ -910,7 +927,7 @@ mod tests {
         }
         assert_eq!(
             manifest_url("v0.2.6"),
-            "https://github.com/jub0t/Concat/releases/download/v0.2.6/manifest.json"
+            "https://github.com/Beau1314/YumoCut/releases/download/v0.2.6/manifest.json"
         );
     }
 

@@ -108,18 +108,18 @@ fn main() {
     // and without one they show Windows' generic program icon. Needs the
     // Windows SDK's rc.exe, which an MSVC toolchain has.
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
-        let icon = "../../../assets/icons/concat.ico";
+        let icon = "../../../assets/icons/yumocut.ico";
         println!("cargo:rerun-if-changed={icon}");
         // The file's name and description as Windows shows them in its
-        // properties, and as code signing checks them: "Concat" in every
+        // properties, and as code signing checks them: "YumoCut" in every
         // build, where the default would be the crate's lower-case name.
         winresource::WindowsResource::new()
             .set_icon(icon)
-            .set("ProductName", "Concat")
-            .set("FileDescription", "Concat")
+            .set("ProductName", "YumoCut")
+            .set("FileDescription", "YumoCut")
             .set(
                 "LegalCopyright",
-                "Copyright 2026 Jareer Abdullah, AGPL-3.0-or-later",
+                "Copyright 2026 Jareer Abdullah and YumoCut contributors, AGPL-3.0-or-later",
             )
             .compile()
             .expect("could not embed the Windows icon");

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">YumoCut</title>
+  <defs>
+    <linearGradient id="background" x1="24" y1="20" x2="232" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20263b"/>
+      <stop offset="1" stop-color="#0d1120"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#background)"/>
+  <path d="M48 60 L91 104 L134 60 M91 104 V194" fill="none" stroke="#61e6cf" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M205 82 C190 61 157 60 140 82 C121 106 121 150 140 174 C157 196 190 195 205 174" fill="none" stroke="#f5f7ff" stroke-width="22" stroke-linecap="round"/>
+</svg>

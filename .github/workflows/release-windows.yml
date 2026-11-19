@@ -1,0 +1,190 @@
+name: Release YumoCut for Windows
+
+# YumoCut's supported release path: Windows x86_64, its registered plugin
+# catalog, and the manifests its updater reads. Every release starts as a
+# draft so a person can inspect it before installed copies can discover it.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: An existing version tag to build, for example v0.2.12
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      tag:
+        description: An existing version tag to build, for example v0.2.12
+        required: true
+        type: string
+
+concurrency:
+  group: yumocut-release-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Tag matches the version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: The tag is a stable version tag
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a stable version tag (v1.2.3)"
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - id: tag
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' src/Cargo.toml | head -1)
+          if [ "$TAG" != "v$version" ]; then
+            echo "tag $TAG does not match src/Cargo.toml version $version" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  engine:
+    name: CI
+    needs: check
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.check.outputs.tag }}
+
+  build:
+    name: Windows x86_64
+    needs: [check, engine]
+    uses: ./.github/workflows/build-app.yml
+    with:
+      ref: ${{ needs.check.outputs.tag }}
+      targets: windows
+    secrets: inherit
+
+  publish:
+    name: Draft release with app and plugin updates
+    needs: [check, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: bundles
+          pattern: YumoCut-windows-*
+          merge-multiple: true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+          path: source
+
+      - name: Validate the registered plugins and write their catalog
+        env:
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s source/scripts -p 'test_plugin_updates.py' -v
+          python3 source/scripts/plugin_updates.py \
+            --repository Beau1314/YumoCut \
+            --tag "$TAG" \
+            --plugins source/plugins \
+            --out bundles/plugins.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("bundles/plugins.json").read_text(encoding="utf-8"))
+          assert data["schema"] == 1
+          assert data["plugins"], "a release must carry its registered plugin catalog"
+          for plugin in data["plugins"]:
+              for file in plugin["files"]:
+                  asset = Path("bundles") / file["url"].rsplit("/", 1)[1]
+                  assert asset.is_file(), asset
+          PY
+
+      - name: Write the application update manifest
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          set -euo pipefail
+          python3 source/scripts/models.py release-manifest \
+            --version "$VERSION" \
+            --tag "$TAG" \
+            --repository Beau1314/YumoCut \
+            --product YumoCut \
+            --bundles bundles \
+            --out bundles/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("bundles/manifest.json").read_text(encoding="utf-8"))
+          assert data["product"] == "YumoCut"
+          windows = data["binaries"]["windows"]["x86_64"]
+          assert set(windows) == {"setup", "msi"}
+          for package in windows.values():
+              assert package["url"].startswith("https://github.com/Beau1314/YumoCut/")
+              assert Path("bundles", package["file"]).is_file()
+          for model in data["models"].values():
+              assert model["url"].startswith("https://github.com/jub0t/Concat/")
+          PY
+          cat bundles/manifest.json
+
+      - name: Checksums
+        run: |
+          set -euo pipefail
+          cd bundles
+          ls -l
+          sha256sum -- * > SHA256SUMS
+
+      - name: Write Windows release notes
+        env:
+          TAG: ${{ needs.check.outputs.tag }}
+          WINDOWS_SIGNED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## YumoCut ${TAG#v}"
+            echo
+            echo "An unofficial, modified version of [Concat](https://github.com/jub0t/Concat), published by the YumoCut project."
+            echo
+            echo "### Download"
+            echo
+            echo "- **Windows x86_64:** the \`windows-x86_64-setup.exe\` installer, or the \`.msi\` for managed deployment."
+            echo "- \`manifest.json\` and \`plugins.json\` describe application and registered-plugin updates."
+            echo "- \`SHA256SUMS\` lists every release asset's checksum."
+            echo
+            if [ "$WINDOWS_SIGNED" = false ]; then
+              echo "### Before you install"
+              echo
+              echo "This build is not code-signed. Windows SmartScreen may ask for confirmation; Smart App Control can refuse unsigned programs."
+              echo
+            fi
+            echo "### Source and notices"
+            echo
+            echo "Source: https://github.com/Beau1314/YumoCut/tree/$TAG"
+            echo
+            echo "YumoCut remains AGPL-3.0-or-later. See \`FORK_NOTICES.md\`, \`LICENSE\`, \`LICENSING.md\`, \`THIRD_PARTY_NOTICES.md\`, and \`TRADEMARK.md\` in the installed application and source tree."
+          } > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          tag_name: ${{ needs.check.outputs.tag }}
+          name: YumoCut ${{ needs.check.outputs.tag }}
+          draft: true
+          prerelease: false
+          body_path: ${{ runner.temp }}/notes.md
+          fail_on_unmatched_files: true
+          files: bundles/*

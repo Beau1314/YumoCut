@@ -51,22 +51,22 @@ TABLES = {
 # version to fill in. Installers and binaries, never an archive of a
 # folder - a person downloads the thing they run.
 BUNDLES = [
-    ("macos", "arm64", "dmg", "Concat-{v}-macos-arm64.dmg"),
-    ("macos", "x86_64", "dmg", "Concat-{v}-macos-x86_64.dmg"),
-    ("linux", "x86_64", "deb", "Concat-{v}-linux-x86_64.deb"),
-    ("linux", "x86_64", "rpm", "Concat-{v}-linux-x86_64.rpm"),
-    ("linux", "x86_64", "appimage", "Concat-{v}-x86_64.AppImage"),
-    ("linux", "x86_64", "pacman", "Concat-{v}-linux-x86_64.pkg.tar.zst"),
-    ("linux", "aarch64", "deb", "Concat-{v}-linux-aarch64.deb"),
-    ("linux", "aarch64", "rpm", "Concat-{v}-linux-aarch64.rpm"),
-    ("linux", "aarch64", "appimage", "Concat-{v}-aarch64.AppImage"),
-    ("linux", "aarch64", "pacman", "Concat-{v}-linux-aarch64.pkg.tar.zst"),
-    ("windows", "x86_64", "setup", "Concat-{v}-windows-x86_64-setup.exe"),
-    ("windows", "x86_64", "msi", "Concat-{v}-windows-x86_64.msi"),
-    ("windows", "aarch64", "setup", "Concat-{v}-windows-aarch64-setup.exe"),
-    ("windows", "aarch64", "msi", "Concat-{v}-windows-aarch64.msi"),
-    ("android", "arm64", "apk", "Concat-{v}-android-arm64.apk"),
-    ("ios", "arm64", "ipa", "Concat-{v}-ios-arm64.ipa"),
+    ("macos", "arm64", "dmg", "{product}-{v}-macos-arm64.dmg"),
+    ("macos", "x86_64", "dmg", "{product}-{v}-macos-x86_64.dmg"),
+    ("linux", "x86_64", "deb", "{product}-{v}-linux-x86_64.deb"),
+    ("linux", "x86_64", "rpm", "{product}-{v}-linux-x86_64.rpm"),
+    ("linux", "x86_64", "appimage", "{product}-{v}-x86_64.AppImage"),
+    ("linux", "x86_64", "pacman", "{product}-{v}-linux-x86_64.pkg.tar.zst"),
+    ("linux", "aarch64", "deb", "{product}-{v}-linux-aarch64.deb"),
+    ("linux", "aarch64", "rpm", "{product}-{v}-linux-aarch64.rpm"),
+    ("linux", "aarch64", "appimage", "{product}-{v}-aarch64.AppImage"),
+    ("linux", "aarch64", "pacman", "{product}-{v}-linux-aarch64.pkg.tar.zst"),
+    ("windows", "x86_64", "setup", "{product}-{v}-windows-x86_64-setup.exe"),
+    ("windows", "x86_64", "msi", "{product}-{v}-windows-x86_64.msi"),
+    ("windows", "aarch64", "setup", "{product}-{v}-windows-aarch64-setup.exe"),
+    ("windows", "aarch64", "msi", "{product}-{v}-windows-aarch64.msi"),
+    ("android", "arm64", "apk", "{product}-{v}-android-arm64.apk"),
+    ("ios", "arm64", "ipa", "{product}-{v}-ios-arm64.ipa"),
 ]
 
 
@@ -109,8 +109,8 @@ def hf_mirror(url: str) -> str | None:
     return None
 
 
-def asset_url(release: str, file: str) -> str:
-    return f"https://github.com/{REPO}/releases/download/{release}/{file}"
+def asset_url(release: str, file: str, repository: str = REPO) -> str:
+    return f"https://github.com/{repository}/releases/download/{release}/{file}"
 
 
 def engine_id(model: dict) -> str:
@@ -323,7 +323,14 @@ def mirror(out: pathlib.Path, only: list[str]) -> int:
 # ── release manifest ─────────────────────────────────────────────────────
 
 
-def release_manifest(version: str, tag: str, bundles: pathlib.Path | None) -> dict:
+def release_manifest(
+    version: str,
+    tag: str,
+    bundles: pathlib.Path | None,
+    repository: str = REPO,
+    product: str = "Concat",
+) -> dict:
+    """Describe installers from `repository` and models from their own mirror."""
     data = table()
     release = data["release"]
 
@@ -331,10 +338,10 @@ def release_manifest(version: str, tag: str, bundles: pathlib.Path | None) -> di
     # the one it installs with: binaries.linux.x86_64.deb.
     binaries: dict[str, dict] = {}
     for platform, arch, kind, stem in BUNDLES:
-        file = stem.format(v=version)
+        file = stem.format(v=version, product=product)
         entry = {
             "file": file,
-            "url": asset_url(tag, file),
+            "url": asset_url(tag, file, repository),
         }
         if bundles is not None:
             path = bundles / file
@@ -374,7 +381,7 @@ def release_manifest(version: str, tag: str, bundles: pathlib.Path | None) -> di
     return {
         # 2: a target holds one row per kind of file, not one file.
         "schema": 2,
-        "product": "Concat",
+        "product": product,
         "version": version,
         "tag": tag,
         "models_release": release,
@@ -397,12 +404,14 @@ def main() -> int:
     emit.add_argument("--tag", required=True)
     emit.add_argument("--bundles", type=pathlib.Path)
     emit.add_argument("--out", type=pathlib.Path)
+    emit.add_argument("--repository", default=REPO, help="the repository carrying the installers")
+    emit.add_argument("--product", default="Concat", help="the product name in installer filenames")
 
     args = parser.parse_args()
     if args.command == "mirror":
         return mirror(args.out, args.only)
     if args.command == "release-manifest":
-        manifest = release_manifest(args.version, args.tag, args.bundles)
+        manifest = release_manifest(args.version, args.tag, args.bundles, args.repository, args.product)
         text = json.dumps(manifest, indent=2) + "\n"
         if args.out:
             args.out.write_text(text, encoding="utf-8")

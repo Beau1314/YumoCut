@@ -1,0 +1,3 @@
+# YumoCut release compatibility; this is not part of Concat's effect schema.
+[release]
+min_app = "0.2.11"

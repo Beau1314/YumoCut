@@ -51,6 +51,10 @@ on:
         description: The ref to build, when it is not the one this runs on
         type: string
         default: ""
+      targets:
+        description: All platforms, or a comma-separated subset such as windows
+        type: string
+        default: all
     secrets:
       APPLE_CERTIFICATE_P12:
         description: Base64 of a Developer ID Application .p12
@@ -109,62 +113,44 @@ env:
   GGML_NATIVE: "OFF"
 
 jobs:
+  select:
+    name: Select targets
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          rows = [
+              {"platform": "macos", "arch": "arm64", "os": "macos-15", "target": "aarch64-apple-darwin"},
+              {"platform": "macos", "arch": "x86_64", "os": "macos-15-intel", "target": "x86_64-apple-darwin"},
+              {"platform": "linux", "arch": "x86_64", "os": "ubuntu-22.04", "target": "x86_64-unknown-linux-gnu", "ffmpeg": "linux64", "ort": "x64", "nfpm": "amd64", "appimage": "x86_64", "ggml": "variants"},
+              {"platform": "linux", "arch": "aarch64", "os": "ubuntu-22.04-arm", "target": "aarch64-unknown-linux-gnu", "ffmpeg": "linuxarm64", "ort": "aarch64", "nfpm": "arm64", "appimage": "aarch64"},
+              {"platform": "windows", "arch": "x86_64", "os": "windows-2022", "target": "x86_64-pc-windows-msvc", "ffmpeg": "win64", "ort": "win-x64", "llvm": "win64", "vc": "x64", "inno": "x64compatible", "wix": "x64", "ggml": "variants"},
+          ]
+          requested = os.environ["TARGETS"].strip()
+          targets = {row["platform"] for row in rows} if requested == "all" else {item.strip() for item in requested.split(",") if item.strip()}
+          unknown = targets - {row["platform"] for row in rows}
+          if unknown or not targets:
+              raise SystemExit(f"unknown or empty build targets: {requested!r}")
+          matrix = {"include": [row for row in rows if row["platform"] in targets]}
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("matrix=" + json.dumps(matrix, separators=(",", ":")) + "\n")
+          PY
+
   app:
     name: ${{ matrix.platform }}-${{ matrix.arch }}
+    needs: select
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # `ffmpeg` and `ort` name the target the way each project's
-          # release archives do.
-          - platform: macos
-            arch: arm64
-            os: macos-15
-            target: aarch64-apple-darwin
-          - platform: macos
-            arch: x86_64
-            os: macos-15-intel
-            target: x86_64-apple-darwin
-            # No `ggml` row: built as 0.2.7 was, with no AVX2. This bundle
-            # runs on macOS 12 again, and so on the 2013 Mac Pro, whose Ivy
-            # Bridge has AVX and nothing newer; Intel Macs are about one
-            # download in a hundred, and slower captions there beat a crash.
-          # 22.04, not latest: the binary links the build machine's glibc,
-          # so the oldest supported runner is what keeps it runnable on
-          # older distributions.
-          - platform: linux
-            arch: x86_64
-            os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-            ffmpeg: linux64
-            ort: x64
-            nfpm: amd64
-            appimage: x86_64
-            ggml: variants
-          - platform: linux
-            arch: aarch64
-            os: ubuntu-22.04-arm
-            target: aarch64-unknown-linux-gnu
-            ffmpeg: linuxarm64
-            ort: aarch64
-            nfpm: arm64
-            appimage: aarch64
-          - platform: windows
-            arch: x86_64
-            os: windows-2022
-            target: x86_64-pc-windows-msvc
-            ffmpeg: win64
-            ort: win-x64
-            llvm: win64
-            vc: x64
-            inno: x64compatible
-            wix: x64
-            ggml: variants
-          # No Windows on ARM until its program starts: v0.2.7-rc.4's
-          # concat.exe died with an access violation on `--version` (#326).
-          # Its row was platform windows, arch aarch64, os windows-11-arm,
-          # target aarch64-pc-windows-msvc, ffmpeg winarm64, ort
-          # win-arm64, llvm woa64, vc and inno and wix arm64.
+        include: ${{ fromJson(needs.select.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     # The slowest target is Intel macOS, whose build alone ran past an hour
     # in v0.2.7-rc.1. The steps that can hang have timeouts of their own,
@@ -514,6 +500,13 @@ jobs:
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Check registered plugins (Windows)
+        if: matrix.platform == 'windows'
+        timeout-minutes: 30
+        shell: bash
+        working-directory: src
+        run: cargo run --profile app -p concat-cli --target ${{ matrix.target }} -- check ../plugins
 
       # ── Package: macOS ─────────────────────────────────────────────────
       # An .app bundle: the binary, an icon set made from the repository's
@@ -918,7 +911,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           $ErrorActionPreference = "Stop"
-          $name = "Concat-$env:VERSION-windows-${{ matrix.arch }}"
+          $name = "YumoCut-$env:VERSION-windows-${{ matrix.arch }}"
           $dir = "stage\$name"
           New-Item -ItemType Directory -Force $dir | Out-Null
           Copy-Item "src\target\${{ matrix.target }}\app\concat.exe" $dir
@@ -939,7 +932,7 @@ jobs:
               if (-not (Test-Path "$dir\ggml-cpu-$module.dll")) { throw "ggml-cpu-$module.dll is missing from the build" }
             }
           }
-          Copy-Item LICENSE, THIRD_PARTY_NOTICES.md $dir
+          Copy-Item LICENSE, LICENSING.md, THIRD_PARTY_NOTICES.md, TRADEMARK.md, FORK_NOTICES.md $dir
           # The Visual C++ runtime DLLs anything in the folder imports, from
           # the newest redistributable folder Visual Studio carries.
           $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
@@ -1003,7 +996,7 @@ jobs:
           if (-not $signtool) { throw "signtool.exe is not in the Windows SDK" }
           "SIGNTOOL=$($signtool.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
           "SIGNING_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          $dir = "stage\Concat-$env:VERSION-windows-${{ matrix.arch }}"
+          $dir = "stage\YumoCut-$env:VERSION-windows-${{ matrix.arch }}"
           $unsigned = Get-ChildItem $dir -Recurse -File -Include *.exe, *.dll |
             Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -ne "Valid" }
           foreach ($file in $unsigned) {
@@ -1024,7 +1017,7 @@ jobs:
         shell: pwsh
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        run: scripts/ci/smoke-windows.ps1 -Bundle "stage\Concat-$env:VERSION-windows-${{ matrix.arch }}"
+        run: scripts/ci/smoke-windows.ps1 -Bundle "stage\YumoCut-$env:VERSION-windows-${{ matrix.arch }}"
 
       # The same, then `--version` under Intel's emulator posing as an Ivy
       # Bridge (#313). A step of its own, after the plain smoke test: in
@@ -1052,7 +1045,7 @@ jobs:
           $sde = (Get-ChildItem sde -Recurse -Filter sde.exe | Select-Object -First 1).FullName
           if (-not $sde) { throw "sde.exe is not in the archive" }
           Write-Host "SDE at $sde"
-          scripts/ci/smoke-windows.ps1 -Bundle "stage\Concat-$env:VERSION-windows-x86_64" -Sde $sde
+          scripts/ci/smoke-windows.ps1 -Bundle "stage\YumoCut-$env:VERSION-windows-x86_64" -Sde $sde
 
       # Every x86_64 binary in the folder, disassembled and counted for
       # instructions an Ivy Bridge does not have, against what
@@ -1064,7 +1057,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         # llvm-objdump from the LLVM installed above, on the path.
-        run: scripts/ci/isa-scan.sh "stage/Concat-${VERSION}-windows-${{ matrix.arch }}"
+        run: scripts/ci/isa-scan.sh "stage/YumoCut-${VERSION}-windows-${{ matrix.arch }}"
 
       # The installers, from the checked folder: Inno Setup's .exe and
       # WiX's .msi, each signed when the folder was.
@@ -1075,7 +1068,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           $ErrorActionPreference = "Stop"
-          $name = "Concat-$env:VERSION-windows-${{ matrix.arch }}"
+          $name = "YumoCut-$env:VERSION-windows-${{ matrix.arch }}"
           function Sign($file) {
             if (-not $env:SIGNING_THUMBPRINT) { return }
             & $env:SIGNTOOL sign /sha1 $env:SIGNING_THUMBPRINT /s My /fd SHA256 `
@@ -1118,6 +1111,6 @@ jobs:
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: Concat-${{ matrix.platform }}-${{ matrix.arch }}
+          name: YumoCut-${{ matrix.platform }}-${{ matrix.arch }}
           path: stage/*
           if-no-files-found: error

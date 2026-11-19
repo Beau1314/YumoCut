@@ -125,10 +125,7 @@ pub fn catalog_from_json(json: &str) -> Result<Vec<PluginEntry>, String> {
                 ));
             }
             if !paths.insert(file.path.clone()) {
-                return Err(format!(
-                    "plugin {} lists {} twice",
-                    plugin.id, file.path
-                ));
+                return Err(format!("plugin {} lists {} twice", plugin.id, file.path));
             }
             if !valid_download_url(&file.url) {
                 return Err(format!(
@@ -147,9 +144,9 @@ pub fn catalog_from_json(json: &str) -> Result<Vec<PluginEntry>, String> {
                     plugin.id, file.path
                 ));
             }
-            total = total.checked_add(file.bytes).ok_or_else(|| {
-                format!("plugin {} has an unrepresentable total size", plugin.id)
-            })?;
+            total = total
+                .checked_add(file.bytes)
+                .ok_or_else(|| format!("plugin {} has an unrepresentable total size", plugin.id))?;
             if total > MAX_BYTES {
                 return Err(format!(
                     "plugin {} exceeds the {MAX_BYTES}-byte size limit",
@@ -188,7 +185,10 @@ fn safe_relative_path(path: &str) -> bool {
 }
 
 fn valid_download_url(url: &str) -> bool {
-    if url.strip_prefix("https://").is_some_and(|rest| !rest.is_empty()) {
+    if url
+        .strip_prefix("https://")
+        .is_some_and(|rest| !rest.is_empty())
+    {
         return true;
     }
     #[cfg(test)]
@@ -271,11 +271,7 @@ pub fn installed_plugins(dir: &std::path::Path) -> Vec<InstalledPlugin> {
 }
 
 /// Matches this release's registered packages against the installed ones.
-pub fn offer(
-    release: Release,
-    catalog: Vec<PluginEntry>,
-    dir: &std::path::Path,
-) -> UpdateOffer {
+pub fn offer(release: Release, catalog: Vec<PluginEntry>, dir: &std::path::Path) -> UpdateOffer {
     let current = Version::current();
     let mut plugins = Vec::new();
     for installed in installed_plugins(dir) {
@@ -342,22 +338,17 @@ impl PreparedUpdate {
             let package = updates::fetch_package(&offer.release, kind)?;
             app_bytes = package.bytes;
             let folder = updates::folder(&dirs);
-            let path = updates::download_package(
-                &package,
-                &folder,
-                &cancel,
-                &mut |received, _| progress(received, app_bytes + plugin_bytes),
-            )?;
+            let path =
+                updates::download_package(&package, &folder, &cancel, &mut |received, _| {
+                    progress(received, app_bytes + plugin_bytes)
+                })?;
             Some((path, kind))
         } else {
             None
         };
-        let plugins = prepare_plugins(
-            &candidates,
-            &dirs,
-            &cancel,
-            &mut |received, _| progress(app_bytes + received, app_bytes + plugin_bytes),
-        )?;
+        let plugins = prepare_plugins(&candidates, &dirs, &cancel, &mut |received, _| {
+            progress(app_bytes + received, app_bytes + plugin_bytes)
+        })?;
         Ok(PreparedUpdate {
             release: offer.release,
             app,
@@ -400,10 +391,7 @@ pub fn prepare_plugins(
     let root = dirs.data.join("updates").join("plugins");
     static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let sequence = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let workspace = root.join(format!(
-        "yumocut-{}-{sequence}",
-        std::process::id()
-    ));
+    let workspace = root.join(format!("yumocut-{}-{sequence}", std::process::id()));
     std::fs::create_dir_all(&workspace)
         .map_err(|error| format!("could not create {}: {error}", workspace.display()))?;
     let result = prepare_into(candidates, &workspace, cancel, progress);
@@ -420,7 +408,12 @@ fn prepare_into(
     progress: &mut dyn FnMut(u64, u64),
 ) -> Result<PreparedPlugins, String> {
     let total = candidates.iter().fold(0_u64, |sum, status| {
-        sum + status.entry.files.iter().map(|file| file.bytes).sum::<u64>()
+        sum + status
+            .entry
+            .files
+            .iter()
+            .map(|file| file.bytes)
+            .sum::<u64>()
     });
     let mut completed = 0_u64;
     let mut items = Vec::with_capacity(candidates.len());
@@ -456,13 +449,11 @@ fn prepare_into(
                 .split('/')
                 .fold(staged.clone(), |path, part| path.join(part));
             if let Some(parent) = destination.parent() {
-                std::fs::create_dir_all(parent).map_err(|error| {
-                    format!("could not create {}: {error}", parent.display())
-                })?;
+                std::fs::create_dir_all(parent)
+                    .map_err(|error| format!("could not create {}: {error}", parent.display()))?;
             }
-            std::fs::rename(&partial, &destination).map_err(|error| {
-                format!("could not stage {}: {error}", destination.display())
-            })?;
+            std::fs::rename(&partial, &destination)
+                .map_err(|error| format!("could not stage {}: {error}", destination.display()))?;
             completed += file.bytes;
             progress(completed, total);
         }
@@ -529,7 +520,10 @@ impl PreparedPlugins {
 impl AppliedPlugins {
     /// IDs whose replacement can make this reload fail.
     pub fn ids(&self) -> HashSet<String> {
-        self.records.iter().map(|record| record.id.clone()).collect()
+        self.records
+            .iter()
+            .map(|record| record.id.clone())
+            .collect()
     }
 
     /// Whether a reload error belongs to this updated group.
@@ -590,11 +584,13 @@ fn copy_tree(from: &std::path::Path, to: &std::path::Path) -> Result<(), String>
         if kind.is_dir() {
             copy_tree(&source, &destination)?;
         } else if kind.is_file() {
-            std::fs::copy(&source, &destination).map_err(|error| {
-                format!("could not copy {}: {error}", source.display())
-            })?;
+            std::fs::copy(&source, &destination)
+                .map_err(|error| format!("could not copy {}: {error}", source.display()))?;
         } else {
-            return Err(format!("{} is not a regular package file", source.display()));
+            return Err(format!(
+                "{} is not a regular package file",
+                source.display()
+            ));
         }
     }
     Ok(())
@@ -605,9 +601,8 @@ fn apply_into(
     transaction: std::path::PathBuf,
     workspace: std::path::PathBuf,
 ) -> Result<AppliedPlugins, String> {
-    std::fs::create_dir_all(&transaction).map_err(|error| {
-        format!("could not create {}: {error}", transaction.display())
-    })?;
+    std::fs::create_dir_all(&transaction)
+        .map_err(|error| format!("could not create {}: {error}", transaction.display()))?;
     let mut records: Vec<AppliedPlugin> = Vec::with_capacity(items.len());
     for (index, item) in items.into_iter().enumerate() {
         let attempt = || {
@@ -654,11 +649,17 @@ fn recover(records: &[AppliedPlugin]) -> Result<(), String> {
         if record.target.exists()
             && let Err(error) = std::fs::remove_dir_all(&record.target)
         {
-            errors.push(format!("could not remove {}: {error}", record.target.display()));
+            errors.push(format!(
+                "could not remove {}: {error}",
+                record.target.display()
+            ));
             continue;
         }
         if let Err(error) = std::fs::rename(&record.old, &record.target) {
-            errors.push(format!("could not restore {}: {error}", record.target.display()));
+            errors.push(format!(
+                "could not restore {}: {error}",
+                record.target.display()
+            ));
         }
     }
     if errors.is_empty() {
@@ -677,44 +678,83 @@ mod tests {
     #[test]
     fn a_catalog_rejects_ambiguous_or_unsafe_entries() {
         assert_eq!(catalog_from_json(VALID).expect("valid")[0].id, "yumo.glow");
-        for path in ["", "/effect.toml", "../effect.toml", "a\\effect.toml", "./effect.toml", "C:/effect.toml"] {
+        for path in [
+            "",
+            "/effect.toml",
+            "../effect.toml",
+            "a\\effect.toml",
+            "./effect.toml",
+            "C:/effect.toml",
+        ] {
             let bad = VALID.replace("\"path\":\"effect.toml\"", &format!("\"path\":\"{path}\""));
             assert!(catalog_from_json(&bad).is_err(), "{path}");
         }
-        let object = VALID.split("\"plugins\":[").nth(1).expect("entry").split("]}").next().expect("object");
+        let object = VALID
+            .split("\"plugins\":[")
+            .nth(1)
+            .expect("entry")
+            .split("]}")
+            .next()
+            .expect("object");
         let duplicate = format!("{{\"schema\":1,\"plugins\":[{object},{object}]}}");
         assert!(catalog_from_json(&duplicate).is_err());
     }
 
     #[test]
     fn a_catalog_rejects_bad_digests_duplicates_and_missing_manifests() {
-        for digest in ["0", "A000000000000000000000000000000000000000000000000000000000000000", "g000000000000000000000000000000000000000000000000000000000000000"] {
-            assert!(catalog_from_json(&VALID.replace(&"0".repeat(64), digest)).is_err(), "{digest}");
+        for digest in [
+            "0",
+            "A000000000000000000000000000000000000000000000000000000000000000",
+            "g000000000000000000000000000000000000000000000000000000000000000",
+        ] {
+            assert!(
+                catalog_from_json(&VALID.replace(&"0".repeat(64), digest)).is_err(),
+                "{digest}"
+            );
         }
         let duplicate_path = VALID.replace(
             "]}]}",
             ",{\"path\":\"effect.toml\",\"url\":\"https://example.test/other\",\"bytes\":1,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}]}]}",
         );
         assert!(catalog_from_json(&duplicate_path).is_err());
-        assert!(catalog_from_json(&VALID.replace("\"path\":\"effect.toml\"", "\"path\":\"shader.wgsl\"")).is_err());
+        assert!(
+            catalog_from_json(
+                &VALID.replace("\"path\":\"effect.toml\"", "\"path\":\"shader.wgsl\"")
+            )
+            .is_err()
+        );
     }
 
     #[test]
     fn a_catalog_enforces_versions_schema_and_limits() {
         assert!(catalog_from_json(&VALID.replace("\"version\":2", "\"version\":0")).is_err());
         assert!(catalog_from_json(&VALID.replace("\"schema\":1", "\"schema\":2")).is_err());
-        assert!(catalog_from_json(&VALID.replace("\"min_app\":\"0.2.11\"", "\"min_app\":\"next\"")).is_err());
-        assert!(catalog_from_json(&VALID.replace("\"bytes\":1", &format!("\"bytes\":{}", 32 * 1024 * 1024 + 1))).is_err());
+        assert!(
+            catalog_from_json(&VALID.replace("\"min_app\":\"0.2.11\"", "\"min_app\":\"next\""))
+                .is_err()
+        );
+        assert!(
+            catalog_from_json(&VALID.replace(
+                "\"bytes\":1",
+                &format!("\"bytes\":{}", 32 * 1024 * 1024 + 1)
+            ))
+            .is_err()
+        );
 
         let file = r#"{"path":"effect.toml","url":"https://example.test/effect","bytes":1,"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}"#;
         let files = std::iter::repeat_n(file, 65).collect::<Vec<_>>().join(",");
-        let many = format!("{{\"schema\":1,\"plugins\":[{{\"id\":\"yumo.glow\",\"version\":2,\"format\":2,\"min_app\":\"0.2.11\",\"files\":[{files}]}}]}}");
+        let many = format!(
+            "{{\"schema\":1,\"plugins\":[{{\"id\":\"yumo.glow\",\"version\":2,\"format\":2,\"min_app\":\"0.2.11\",\"files\":[{files}]}}]}}"
+        );
         assert!(catalog_from_json(&many).is_err());
     }
 
     #[test]
     fn catalog_urls_come_from_the_yumocut_release() {
-        assert_eq!(catalog_url("v0.2.12"), "https://github.com/Beau1314/YumoCut/releases/download/v0.2.12/plugins.json");
+        assert_eq!(
+            catalog_url("v0.2.12"),
+            "https://github.com/Beau1314/YumoCut/releases/download/v0.2.12/plugins.json"
+        );
     }
 
     fn entry(id: &str, version: u32, format: u32, min_app: &str) -> PluginEntry {
@@ -754,7 +794,10 @@ mod tests {
         let temp = tempfile::tempdir().expect("temp");
         write_audio_package(&temp.path().join("yumo.volume"), "yumo.volume", 1);
         write_audio_package(&temp.path().join("local.private"), "local.private", 1);
-        let entries = vec![entry("yumo.volume", 2, 2, "0.2.11"), entry("other.new", 2, 2, "0.2.11")];
+        let entries = vec![
+            entry("yumo.volume", 2, 2, "0.2.11"),
+            entry("other.new", 2, 2, "0.2.11"),
+        ];
         let result = offer(release("0.2.12"), entries, temp.path());
         assert!(result.app);
         let candidates = result.candidates();
@@ -767,21 +810,48 @@ mod tests {
     fn selection_explains_compatibility_and_never_downgrades() {
         let temp = tempfile::tempdir().expect("temp");
         write_audio_package(&temp.path().join("yumo.volume"), "yumo.volume", 2);
-        let same = offer(release("0.2.11"), vec![entry("yumo.volume", 2, 2, "0.2.11")], temp.path());
+        let same = offer(
+            release("0.2.11"),
+            vec![entry("yumo.volume", 2, 2, "0.2.11")],
+            temp.path(),
+        );
         assert!(!same.app);
         assert!(same.candidates().is_empty());
         assert_eq!(same.plugins[0].state, PluginState::Current);
 
-        let lower = offer(release("0.2.12"), vec![entry("yumo.volume", 1, 2, "0.2.11")], temp.path());
+        let lower = offer(
+            release("0.2.12"),
+            vec![entry("yumo.volume", 1, 2, "0.2.11")],
+            temp.path(),
+        );
         assert!(lower.candidates().is_empty());
         assert_eq!(lower.plugins[0].state, PluginState::Current);
 
-        let app = offer(release("0.2.12"), vec![entry("yumo.volume", 3, 2, "0.2.13")], temp.path());
-        assert_eq!(app.plugins[0].state, PluginState::NeedsApp(Version::new(0, 2, 13)));
+        let app = offer(
+            release("0.2.12"),
+            vec![entry("yumo.volume", 3, 2, "0.2.13")],
+            temp.path(),
+        );
+        assert_eq!(
+            app.plugins[0].state,
+            PluginState::NeedsApp(Version::new(0, 2, 13))
+        );
         assert!(app.candidates().is_empty());
 
-        let format = offer(release("0.2.12"), vec![entry("yumo.volume", 3, concat_effects::FORMAT + 1, "0.2.11")], temp.path());
-        assert_eq!(format.plugins[0].state, PluginState::NeedsFormat(concat_effects::FORMAT + 1));
+        let format = offer(
+            release("0.2.12"),
+            vec![entry(
+                "yumo.volume",
+                3,
+                concat_effects::FORMAT + 1,
+                "0.2.11",
+            )],
+            temp.path(),
+        );
+        assert_eq!(
+            format.plugins[0].state,
+            PluginState::NeedsFormat(concat_effects::FORMAT + 1)
+        );
         assert!(format.candidates().is_empty());
     }
 
@@ -792,7 +862,10 @@ mod tests {
         std::fs::create_dir_all(&broken).expect("folder");
         std::fs::write(broken.join("effect.toml"), "not a manifest").expect("manifest");
         assert!(installed_plugins(temp.path()).is_empty());
-        assert_eq!(std::fs::read_to_string(broken.join("effect.toml")).expect("untouched"), "not a manifest");
+        assert_eq!(
+            std::fs::read_to_string(broken.join("effect.toml")).expect("untouched"),
+            "not a manifest"
+        );
     }
 
     fn audio_source(id: &str, version: u32) -> Vec<u8> {
@@ -801,12 +874,13 @@ mod tests {
 
     fn digest(bytes: &[u8]) -> String {
         use sha2::{Digest, Sha256};
-        Sha256::digest(bytes).iter().map(|byte| format!("{byte:02x}")).collect()
+        Sha256::digest(bytes)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect()
     }
 
-    fn static_server(
-        files: Vec<(&str, Vec<u8>)>,
-    ) -> (String, std::thread::JoinHandle<()>) {
+    fn static_server(files: Vec<(&str, Vec<u8>)>) -> (String, std::thread::JoinHandle<()>) {
         use std::io::{Read, Write};
         let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("listen");
         let base = format!("http://{}", listener.local_addr().expect("address"));
@@ -816,7 +890,10 @@ mod tests {
                 let mut request = [0_u8; 2048];
                 let _ = stream.read(&mut request).expect("read request");
                 assert!(request.starts_with(format!("GET {path} ").as_bytes()));
-                let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len());
+                let head = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    body.len()
+                );
                 stream.write_all(head.as_bytes()).expect("headers");
                 stream.write_all(&body).expect("body");
             }
@@ -841,12 +918,19 @@ mod tests {
                 version: 2,
                 format: 1,
                 min_app: Version::new(0, 2, 11),
-                files: files.into_iter().map(|(path, body)| PluginFile {
-                    path: path.to_owned(),
-                    url: format!("{base}/{path}"),
-                    bytes: body.len() as u64,
-                    sha256: if wrong_digest { "0".repeat(64) } else { digest(&body) },
-                }).collect(),
+                files: files
+                    .into_iter()
+                    .map(|(path, body)| PluginFile {
+                        path: path.to_owned(),
+                        url: format!("{base}/{path}"),
+                        bytes: body.len() as u64,
+                        sha256: if wrong_digest {
+                            "0".repeat(64)
+                        } else {
+                            digest(&body)
+                        },
+                    })
+                    .collect(),
             },
             target,
         }
@@ -860,11 +944,25 @@ mod tests {
         let before = std::fs::read_to_string(installed.join("effect.toml")).expect("old");
         let body = audio_source("yumo.volume", 2);
         let (base, server) = static_server(vec![("effect.toml", body.clone())]);
-        let candidate = download_candidate("yumo.volume", installed.clone(), &base, vec![("effect.toml", body)], true);
-        let result = prepare_plugins(&[candidate], &crate::AppDirs::under(temp.path()), &std::sync::atomic::AtomicBool::new(false), &mut |_, _| {});
+        let candidate = download_candidate(
+            "yumo.volume",
+            installed.clone(),
+            &base,
+            vec![("effect.toml", body)],
+            true,
+        );
+        let result = prepare_plugins(
+            &[candidate],
+            &crate::AppDirs::under(temp.path()),
+            &std::sync::atomic::AtomicBool::new(false),
+            &mut |_, _| {},
+        );
         server.join().expect("server");
         assert!(result.is_err());
-        assert_eq!(std::fs::read_to_string(installed.join("effect.toml")).expect("old"), before);
+        assert_eq!(
+            std::fs::read_to_string(installed.join("effect.toml")).expect("old"),
+            before
+        );
     }
 
     #[test]
@@ -882,15 +980,34 @@ mod tests {
             let (mut stream, _) = listener.accept().expect("request");
             let mut request = [0_u8; 2048];
             let _ = stream.read(&mut request).expect("read request");
-            let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", served.len());
+            let head = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                served.len()
+            );
             stream.write_all(head.as_bytes()).expect("headers");
-            stream.write_all(&served[..served.len() - 1]).expect("truncated body");
+            stream
+                .write_all(&served[..served.len() - 1])
+                .expect("truncated body");
         });
-        let candidate = download_candidate("yumo.volume", installed.clone(), &base, vec![("effect.toml", body)], false);
-        let result = prepare_plugins(&[candidate], &crate::AppDirs::under(temp.path()), &std::sync::atomic::AtomicBool::new(false), &mut |_, _| {});
+        let candidate = download_candidate(
+            "yumo.volume",
+            installed.clone(),
+            &base,
+            vec![("effect.toml", body)],
+            false,
+        );
+        let result = prepare_plugins(
+            &[candidate],
+            &crate::AppDirs::under(temp.path()),
+            &std::sync::atomic::AtomicBool::new(false),
+            &mut |_, _| {},
+        );
         server.join().expect("server");
         assert!(result.is_err());
-        assert_eq!(std::fs::read_to_string(installed.join("effect.toml")).expect("old"), before);
+        assert_eq!(
+            std::fs::read_to_string(installed.join("effect.toml")).expect("old"),
+            before
+        );
     }
 
     #[test]
@@ -901,16 +1018,34 @@ mod tests {
         let manifest = audio_source("yumo.volume", 2);
         let fixtures = b"[[case]]\nname = \"default\"\nchain = \"volume=1\"\n".to_vec();
         let total = manifest.len() as u64 + fixtures.len() as u64;
-        let (base, server) = static_server(vec![("effect.toml", manifest.clone()), ("fixtures.toml", fixtures.clone())]);
-        let candidate = download_candidate("yumo.volume", installed.clone(), &base, vec![("effect.toml", manifest), ("fixtures.toml", fixtures)], false);
+        let (base, server) = static_server(vec![
+            ("effect.toml", manifest.clone()),
+            ("fixtures.toml", fixtures.clone()),
+        ]);
+        let candidate = download_candidate(
+            "yumo.volume",
+            installed.clone(),
+            &base,
+            vec![("effect.toml", manifest), ("fixtures.toml", fixtures)],
+            false,
+        );
         let progress = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
         let seen = progress.clone();
-        let prepared = prepare_plugins(&[candidate], &crate::AppDirs::under(temp.path()), &std::sync::atomic::AtomicBool::new(false), &mut move |received, total| seen.borrow_mut().push((received, total))).expect("prepared");
+        let prepared = prepare_plugins(
+            &[candidate],
+            &crate::AppDirs::under(temp.path()),
+            &std::sync::atomic::AtomicBool::new(false),
+            &mut move |received, total| seen.borrow_mut().push((received, total)),
+        )
+        .expect("prepared");
         server.join().expect("server");
         assert_eq!(prepared.len(), 1);
         assert!(!prepared.is_empty());
         assert_eq!(progress.borrow().last(), Some(&(total, total)));
-        assert_eq!(installed_plugins(&installed.parent().expect("effects"))[0].version, 1);
+        assert_eq!(
+            installed_plugins(&installed.parent().expect("effects"))[0].version,
+            1
+        );
         drop(prepared);
     }
 
@@ -922,19 +1057,47 @@ mod tests {
         let before = std::fs::read_to_string(installed.join("effect.toml")).expect("old");
         let body = audio_source("other.identity", 2);
         let (base, server) = static_server(vec![("effect.toml", body.clone())]);
-        let candidate = download_candidate("yumo.volume", installed.clone(), &base, vec![("effect.toml", body)], false);
-        let result = prepare_plugins(&[candidate], &crate::AppDirs::under(temp.path()), &std::sync::atomic::AtomicBool::new(false), &mut |_, _| {});
+        let candidate = download_candidate(
+            "yumo.volume",
+            installed.clone(),
+            &base,
+            vec![("effect.toml", body)],
+            false,
+        );
+        let result = prepare_plugins(
+            &[candidate],
+            &crate::AppDirs::under(temp.path()),
+            &std::sync::atomic::AtomicBool::new(false),
+            &mut |_, _| {},
+        );
         server.join().expect("server");
         assert!(result.is_err());
-        assert_eq!(std::fs::read_to_string(installed.join("effect.toml")).expect("old"), before);
+        assert_eq!(
+            std::fs::read_to_string(installed.join("effect.toml")).expect("old"),
+            before
+        );
 
         let body = audio_source("yumo.volume", 2);
         let (base, server) = static_server(vec![("effect.toml", body.clone())]);
-        let candidate = download_candidate("yumo.volume", installed.clone(), &base, vec![("effect.toml", body)], false);
-        let result = prepare_plugins(&[candidate], &crate::AppDirs::under(temp.path()), &std::sync::atomic::AtomicBool::new(true), &mut |_, _| {});
+        let candidate = download_candidate(
+            "yumo.volume",
+            installed.clone(),
+            &base,
+            vec![("effect.toml", body)],
+            false,
+        );
+        let result = prepare_plugins(
+            &[candidate],
+            &crate::AppDirs::under(temp.path()),
+            &std::sync::atomic::AtomicBool::new(true),
+            &mut |_, _| {},
+        );
         server.join().expect("server");
         assert_eq!(result.expect_err("cancelled"), updates::CANCELLED);
-        assert_eq!(std::fs::read_to_string(installed.join("effect.toml")).expect("old"), before);
+        assert_eq!(
+            std::fs::read_to_string(installed.join("effect.toml")).expect("old"),
+            before
+        );
     }
 
     fn prepared_audio_package(
@@ -966,7 +1129,10 @@ mod tests {
 
     fn installed_version(target: &std::path::Path) -> u32 {
         let source = std::fs::read_to_string(target.join("effect.toml")).expect("manifest");
-        concat_effects::Manifest::parse(&source).expect("parse").effect.version
+        concat_effects::Manifest::parse(&source)
+            .expect("parse")
+            .effect
+            .version
     }
 
     #[test]
@@ -974,14 +1140,20 @@ mod tests {
         let temp = tempfile::tempdir().expect("temp");
         let first = prepared_audio_package(temp.path(), "yumo.one", 1, 2);
         let second = prepared_audio_package(temp.path(), "yumo.two", 1, 2);
-        let transaction = temp.path().join("effects").join(format!(".yumocut-update-{}", std::process::id()));
+        let transaction = temp
+            .path()
+            .join("effects")
+            .join(format!(".yumocut-update-{}", std::process::id()));
         std::fs::create_dir_all(&transaction).expect("transaction");
         std::fs::write(transaction.join("old-1"), "keep").expect("conflict");
         let result = prepared_group(vec![first.clone(), second.clone()]).apply();
         assert!(result.is_err());
         assert_eq!(installed_version(&first.target), 1);
         assert_eq!(installed_version(&second.target), 1);
-        assert_eq!(std::fs::read_to_string(transaction.join("old-1")).expect("kept"), "keep");
+        assert_eq!(
+            std::fs::read_to_string(transaction.join("old-1")).expect("kept"),
+            "keep"
+        );
     }
 
     #[test]
@@ -989,20 +1161,33 @@ mod tests {
         let temp = tempfile::tempdir().expect("temp");
         let first = prepared_audio_package(temp.path(), "yumo.one", 1, 2);
         let second = prepared_audio_package(temp.path(), "yumo.two", 1, 2);
-        let applied = prepared_group(vec![first.clone(), second.clone()]).apply().expect("applied");
+        let applied = prepared_group(vec![first.clone(), second.clone()])
+            .apply()
+            .expect("applied");
         assert_eq!(installed_version(&first.target), 2);
         assert_eq!(installed_version(&second.target), 2);
         assert_eq!(applied.ids().len(), 2);
-        assert!(applied.involves(&concat_effects::Error::Invalid { id: "yumo.one".to_owned(), message: "bad".to_owned() }));
-        assert!(applied.involves(&concat_effects::Error::Io { path: second.target.join("effect.toml"), message: "bad".to_owned() }));
-        assert!(!applied.involves(&concat_effects::Error::Invalid { id: "local.broken".to_owned(), message: "bad".to_owned() }));
+        assert!(applied.involves(&concat_effects::Error::Invalid {
+            id: "yumo.one".to_owned(),
+            message: "bad".to_owned()
+        }));
+        assert!(applied.involves(&concat_effects::Error::Io {
+            path: second.target.join("effect.toml"),
+            message: "bad".to_owned()
+        }));
+        assert!(!applied.involves(&concat_effects::Error::Invalid {
+            id: "local.broken".to_owned(),
+            message: "bad".to_owned()
+        }));
         applied.finish();
         assert_eq!(installed_version(&first.target), 2);
 
         let applied = prepared_group(vec![
             prepared_audio_package(temp.path(), "yumo.one", 1, 2),
             prepared_audio_package(temp.path(), "yumo.two", 1, 2),
-        ]).apply().expect("applied again");
+        ])
+        .apply()
+        .expect("applied again");
         applied.rollback().expect("rollback");
         assert_eq!(installed_version(&first.target), 1);
         assert_eq!(installed_version(&second.target), 1);
@@ -1014,7 +1199,11 @@ mod tests {
         let first = prepared_audio_package(temp.path(), "yumo.one", 1, 2);
         let sibling = temp.path().join("effects/local.private");
         write_audio_package(&sibling, "local.private", 7);
-        prepared_group(vec![first.clone()]).apply().expect("applied").rollback().expect("rollback");
+        prepared_group(vec![first.clone()])
+            .apply()
+            .expect("applied")
+            .rollback()
+            .expect("rollback");
         assert_eq!(installed_version(&first.target), 1);
         assert_eq!(installed_version(&sibling), 7);
     }

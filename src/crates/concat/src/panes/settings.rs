@@ -622,9 +622,10 @@ impl SettingsPane {
                         self.releases = releases;
                         self.offer = offer;
                         if startup
-                            && self.offer.as_ref().is_some_and(|offer| {
-                                offer.app || !offer.candidates().is_empty()
-                            })
+                            && self
+                                .offer
+                                .as_ref()
+                                .is_some_and(|offer| offer.app || !offer.candidates().is_empty())
                             && studio.confirm.is_none()
                         {
                             studio.confirm = Some(crate::studio::Confirm::UpdatesAvailable);
@@ -1240,9 +1241,8 @@ impl SettingsPane {
             updates_available: self
                 .offer
                 .as_ref()
-                .map_or(0, |offer| {
-                    usize::from(offer.app) + offer.candidates().len()
-                }) as i32,
+                .map_or(0, |offer| usize::from(offer.app) + offer.candidates().len())
+                as i32,
             can_update_all: can_update_all(
                 self.offer.as_ref().is_some_and(|offer| offer.app),
                 self.offer

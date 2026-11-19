@@ -492,9 +492,10 @@ fn start(project: Option<std::path::PathBuf>, smoke: bool) -> Result<(), slint::
     });
     Shell::install(shell.clone());
     if !smoke && !phone {
-        shell.studio.borrow_mut().handle(Msg::Settings(
-            SettingsMsg::CheckStartupUpdates,
-        ));
+        shell
+            .studio
+            .borrow_mut()
+            .handle(Msg::Settings(SettingsMsg::CheckStartupUpdates));
     }
 
     // The machine's fonts, for the Text inspector's picker. Read on a

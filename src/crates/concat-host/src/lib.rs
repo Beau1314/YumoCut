@@ -40,6 +40,7 @@ pub mod memory;
 pub mod models;
 pub mod net;
 pub mod playback;
+pub mod plugin_updates;
 pub mod preview;
 #[cfg(test)]
 mod project_save_tests;

@@ -491,6 +491,11 @@ fn start(project: Option<std::path::PathBuf>, smoke: bool) -> Result<(), slint::
         models: Models::new(),
     });
     Shell::install(shell.clone());
+    if !smoke && !phone {
+        shell.studio.borrow_mut().handle(Msg::Settings(
+            SettingsMsg::CheckStartupUpdates,
+        ));
+    }
 
     // The machine's fonts, for the Text inspector's picker. Read on a
     // worker: on a machine with a few thousand faces it is a moment, and
@@ -2313,6 +2318,9 @@ fn start(project: Option<std::path::PathBuf>, smoke: bool) -> Result<(), slint::
     }));
     app.on_settings_check_updates(on_window!(|state| {
         state.handle(Msg::Settings(SettingsMsg::CheckUpdates));
+    }));
+    app.on_settings_update_all(on_window!(|state| {
+        state.handle(Msg::Settings(SettingsMsg::UpdateAll));
     }));
     app.on_settings_version_chosen(on_window!(|state, index: i32| {
         state.handle(Msg::Settings(SettingsMsg::VersionChosen(index)));

@@ -88,6 +88,11 @@ impl Studio {
                     .map(|session| std::path::PathBuf::from(session.path()));
                 crate::panes::settings::restart(project);
             }
+            Some(Confirm::UpdatesAvailable) => {
+                self.handle(crate::panes::Msg::Settings(
+                    crate::panes::settings::SettingsMsg::UpdateAll,
+                ));
+            }
             #[cfg(target_os = "android")]
             Some(Confirm::LastRunClosed) => {
                 if let Err(error) = crate::platform::share_log() {
@@ -153,6 +158,15 @@ impl Studio {
                 message: t("settings.restartMessage").into(),
                 action: t("settings.restartNow").into(),
                 cancel: t("settings.restartLater").into(),
+                calm: true,
+                glyph: crate::ui::Glyph::Reset,
+            },
+            Confirm::UpdatesAvailable => crate::ui::ConfirmData {
+                open: true,
+                title: t("settings.updateAvailableTitle").into(),
+                message: t("settings.updateAvailableMessage").into(),
+                action: t("settings.updateNow").into(),
+                cancel: t("settings.updateLater").into(),
                 calm: true,
                 glyph: crate::ui::Glyph::Reset,
             },

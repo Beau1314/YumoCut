@@ -307,11 +307,68 @@ pub fn offer(
     }
 }
 
+/// A whole update downloaded and verified, but not yet installed.
+#[derive(Debug)]
+pub struct PreparedUpdate {
+    pub release: Release,
+    pub app: Option<(std::path::PathBuf, updates::PackageKind)>,
+    pub plugins: PreparedPlugins,
+}
+
+impl PreparedUpdate {
+    /// Downloads the app package and every registered plugin candidate.
+    /// Nothing under an installed package folder changes in this phase.
+    pub fn download(
+        offer: UpdateOffer,
+        dirs: crate::AppDirs,
+        app_kind: Option<updates::PackageKind>,
+        cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
+        mut progress: impl FnMut(u64, u64),
+    ) -> Result<PreparedUpdate, String> {
+        let candidates = offer.candidates();
+        let plugin_bytes = candidates.iter().fold(0_u64, |sum, status| {
+            sum + status
+                .entry
+                .files
+                .iter()
+                .map(|file| file.bytes)
+                .sum::<u64>()
+        });
+        let mut app_bytes = 0_u64;
+        let app = if offer.app {
+            let kind = app_kind.ok_or_else(|| {
+                "this installation has no supported application package".to_owned()
+            })?;
+            let package = updates::fetch_package(&offer.release, kind)?;
+            app_bytes = package.bytes;
+            let folder = updates::folder(&dirs);
+            let path = updates::download_package(
+                &package,
+                &folder,
+                &cancel,
+                &mut |received, _| progress(received, app_bytes + plugin_bytes),
+            )?;
+            Some((path, kind))
+        } else {
+            None
+        };
+        let plugins = prepare_plugins(
+            &candidates,
+            &dirs,
+            &cancel,
+            &mut |received, _| progress(app_bytes + received, app_bytes + plugin_bytes),
+        )?;
+        Ok(PreparedUpdate {
+            release: offer.release,
+            app,
+            plugins,
+        })
+    }
+}
+
 #[derive(Clone, Debug)]
 struct PreparedPlugin {
     id: String,
-    version: u32,
-    format: u32,
     staged: std::path::PathBuf,
     target: std::path::PathBuf,
 }
@@ -422,8 +479,6 @@ fn prepare_into(
         }
         items.push(PreparedPlugin {
             id: status.id.clone(),
-            version: status.entry.version,
-            format: status.entry.format,
             staged,
             target: status.target.clone(),
         });
@@ -894,8 +949,6 @@ mod tests {
         write_audio_package(&staged, id, new_version);
         PreparedPlugin {
             id: id.to_owned(),
-            version: new_version,
-            format: 1,
             staged,
             target,
         }

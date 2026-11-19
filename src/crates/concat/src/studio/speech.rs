@@ -86,6 +86,12 @@ impl Studio {
     /// failed. With `announce`, a clean reload is reported too, with the
     /// folder, which is how a newcomer learns where packages go.
     pub fn reload_packages(&mut self, announce: bool) -> usize {
+        self.reload_packages_report(announce).len()
+    }
+
+    /// Rebuilds the package catalogue and returns every refusal, so an
+    /// update can tell its own packages from unrelated broken ones.
+    pub fn reload_packages_report(&mut self, announce: bool) -> Vec<concat_effects::Error> {
         /// A custom package's shader runs once over a picture this many
         /// pixels a side before the package is offered: enough that a loop
         /// bounded in the thousands per pixel shows, and a real frame's
@@ -151,7 +157,7 @@ impl Studio {
                 false,
             );
         }
-        errors.len()
+        errors
     }
 
     /// Starts the watch on the effects folder: a poll every two seconds,

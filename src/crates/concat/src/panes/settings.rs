@@ -12,12 +12,13 @@
 //! [`SettingsMsg::ModelFinished`], and the lists are rebuilt from what is
 //! on disk after anything that could have changed it.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use concat_host::models::SourcePreference;
+use concat_host::plugin_updates::{self, PluginState, PreparedUpdate, UpdateOffer};
 use concat_host::updates::{self, Fixed, Installed, Release, Standing, Version};
 use slint::{ModelRc, SharedString, VecModel};
 
@@ -32,7 +33,7 @@ use crate::studio::Studio;
 use crate::ui::{ModelData, SettingsData, ShortcutData};
 
 /// Everything that can happen to the settings sheet.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub enum SettingsMsg {
     /// The preferences read back on launch, and applied.
     Restore,
@@ -103,10 +104,22 @@ pub enum SettingsMsg {
         id: String,
         result: Result<(), String>,
     },
-    /// The Version page asks GitHub for the releases.
+    /// The Version page asks GitHub for the releases and plugin catalog.
     CheckUpdates,
-    /// The releases, newest first, or why they could not be had.
-    UpdatesFetched(Result<Vec<Release>, String>),
+    /// The same check at launch: failures are logged, not shown.
+    CheckStartupUpdates,
+    /// The releases, newest first, the latest offer, or why it failed.
+    UpdatesFetched {
+        startup: bool,
+        result: Result<(Vec<Release>, Option<UpdateOffer>), String>,
+    },
+    /// Download and apply the latest app and registered plugin updates.
+    UpdateAll,
+    UpdateAllPrepared(Result<PreparedUpdate, String>),
+    UpdateAllFinished {
+        version: Version,
+        result: Result<Installed, String>,
+    },
     /// A release picked from the Version page's list.
     VersionChosen(i32),
     /// Put the picked release in this one's place.
@@ -253,6 +266,10 @@ pub struct SettingsPane {
     /// The Version page's list: the stable releases from 0.2.5 on, newest
     /// first, once GitHub has been asked.
     pub releases: Vec<Release>,
+    /// The latest stable release's app and registered-plugin offer.
+    pub offer: Option<UpdateOffer>,
+    /// A combined download/apply operation is running.
+    pub updating_all: bool,
     /// Which of `releases` the page's dropdown shows.
     pub version_choice: usize,
     /// What the Version page says under the version: looking, up to date,
@@ -312,7 +329,7 @@ impl SettingsPane {
                 // is opened in a run, so it has something to say and to list
                 // without a press; the button looks again.
                 if index == VERSION_PAGE && !self.checked {
-                    self.check_updates();
+                    self.check_updates(studio, false);
                 }
             }
             SettingsMsg::ShortcutCapture(id) => self.capturing = Some(id),
@@ -583,11 +600,12 @@ impl SettingsPane {
                 }
                 self.refresh(studio);
             }
-            SettingsMsg::CheckUpdates => self.check_updates(),
-            SettingsMsg::UpdatesFetched(result) => {
+            SettingsMsg::CheckUpdates => self.check_updates(studio, false),
+            SettingsMsg::CheckStartupUpdates => self.check_updates(studio, true),
+            SettingsMsg::UpdatesFetched { startup, result } => {
                 self.checking = false;
                 match result {
-                    Ok(releases) => {
+                    Ok((releases, offer)) => {
                         self.checked = true;
                         let current = Version::current();
                         self.update_status = match updates::standing(current, &releases) {
@@ -602,9 +620,27 @@ impl SettingsPane {
                         // the one most people opened the page for.
                         self.version_choice = 0;
                         self.releases = releases;
+                        self.offer = offer;
+                        if startup
+                            && self.offer.as_ref().is_some_and(|offer| {
+                                offer.app || !offer.candidates().is_empty()
+                            })
+                            && studio.confirm.is_none()
+                        {
+                            studio.confirm = Some(crate::studio::Confirm::UpdatesAvailable);
+                        }
+                    }
+                    Err(error) if startup => {
+                        log::info!("update: startup check could not finish: {error}");
                     }
                     Err(error) => self.update_status = tf("settings.couldNotCheck", &[&error]),
                 }
+            }
+            SettingsMsg::UpdateAll => self.update_all(studio),
+            SettingsMsg::UpdateAllPrepared(result) => self.apply_prepared(result, studio),
+            SettingsMsg::UpdateAllFinished { version, result } => {
+                self.updating_all = false;
+                self.update(SettingsMsg::InstallFinished { version, result }, studio);
             }
             SettingsMsg::VersionChosen(index) => {
                 self.version_choice =
@@ -659,17 +695,162 @@ impl SettingsPane {
         }
     }
 
-    /// Asks GitHub for the releases on a worker; the answer comes back as
-    /// [`SettingsMsg::UpdatesFetched`].
-    fn check_updates(&mut self) {
-        if self.checking {
+    /// Asks GitHub for releases and the latest release's plugin catalog.
+    /// Startup and manual checks share the result; only a manual error is
+    /// written into the Version page.
+    fn check_updates(&mut self, studio: &Studio, startup: bool) {
+        if self.checking || self.install.is_some() {
             return;
         }
         self.checking = true;
-        self.update_status = t("settings.checkingForUpdates");
-        spawn(updates::fetch_releases, |studio, _, _, result| {
-            studio.handle(Msg::Settings(SettingsMsg::UpdatesFetched(result)));
-        });
+        if !startup {
+            self.update_status = t("settings.checkingForUpdates");
+        }
+        let dirs = studio.host.dirs.clone();
+        spawn(
+            move || {
+                let releases = updates::fetch_releases()?;
+                let offer = match releases.first() {
+                    Some(release) => {
+                        let catalog = plugin_updates::fetch_catalog(release)?;
+                        Some(plugin_updates::offer(
+                            release.clone(),
+                            catalog,
+                            &Studio::looks_dir(&dirs),
+                        ))
+                    }
+                    None => None,
+                };
+                Ok::<_, String>((releases, offer))
+            },
+            move |studio, _, _, result| {
+                studio.handle(Msg::Settings(SettingsMsg::UpdatesFetched {
+                    startup,
+                    result,
+                }));
+            },
+        );
+    }
+
+    /// Starts one combined download. Replacement and the GPU trial wait
+    /// until every app/plugin byte has arrived and passed its digest check.
+    fn update_all(&mut self, studio: &mut Studio) {
+        if self.checking || self.install.is_some() {
+            return;
+        }
+        let Some(offer) = self.offer.clone() else {
+            return;
+        };
+        let candidates = offer.candidates();
+        if !can_update_all(offer.app, candidates.len(), false) {
+            return;
+        }
+        let app_kind = if offer.app {
+            match updates::installed_as() {
+                Ok(kind) => Some(kind),
+                Err(why) => {
+                    studio.notify(&fixed_note(why), true);
+                    return;
+                }
+            }
+        } else {
+            None
+        };
+        let cancel = Arc::new(AtomicBool::new(false));
+        self.install_cancel = Arc::clone(&cancel);
+        self.install = Some((0.0, 0.0));
+        self.updating_all = true;
+        let dirs = studio.host.dirs.clone();
+        log::info!(
+            "update: preparing YumoCut {} and {} plugin(s)",
+            offer.release.version,
+            candidates.len()
+        );
+        spawn(
+            move || {
+                PreparedUpdate::download(offer, dirs, app_kind, cancel, |received, total| {
+                    let msg = SettingsMsg::InstallProgress {
+                        fetched: received as f32 / 1_000_000.0,
+                        total: total as f32 / 1_000_000.0,
+                    };
+                    on_ui(move |studio, _, _| studio.handle(Msg::Settings(msg)));
+                })
+            },
+            |studio, _, _, result| {
+                studio.handle(Msg::Settings(SettingsMsg::UpdateAllPrepared(result)));
+            },
+        );
+    }
+
+    /// Applies the verified plugin group on the UI thread, where the GPU
+    /// trial belongs. A failed updated plugin restores the whole group and
+    /// prevents the app installer from starting.
+    fn apply_prepared(&mut self, result: Result<PreparedUpdate, String>, studio: &mut Studio) {
+        let prepared = match result {
+            Ok(prepared) => prepared,
+            Err(error) => {
+                self.install = None;
+                self.updating_all = false;
+                if self.install_cancel.load(Ordering::Relaxed) {
+                    log::info!("update: combined update cancelled");
+                } else {
+                    log::warn!("update: combined download failed: {error}");
+                    studio.notify(&tf("settings.couldNotUpdateAll", &[&error]), true);
+                }
+                return;
+            }
+        };
+        let PreparedUpdate {
+            release,
+            app,
+            plugins,
+        } = prepared;
+        if !plugins.is_empty() {
+            let applied = match plugins.apply() {
+                Ok(applied) => applied,
+                Err(error) => {
+                    self.install = None;
+                    self.updating_all = false;
+                    studio.notify(&tf("settings.couldNotUpdateAll", &[&error]), true);
+                    return;
+                }
+            };
+            let errors = studio.reload_packages_report(false);
+            let updated = applied.ids();
+            if errors
+                .iter()
+                .any(|error| error_is_updated(error, &updated) || applied.involves(error))
+            {
+                let rollback = applied.rollback();
+                studio.reload_packages_report(false);
+                self.install = None;
+                self.updating_all = false;
+                let message = match rollback {
+                    Ok(()) => t("settings.pluginsRolledBack"),
+                    Err(error) => tf("settings.pluginRollbackFailed", &[&error]),
+                };
+                studio.notify(&message, true);
+                return;
+            }
+            applied.finish();
+        }
+        if let Some((path, kind)) = app {
+            let result = updates::install(&path, kind);
+            self.update(
+                SettingsMsg::UpdateAllFinished {
+                    version: release.version,
+                    result,
+                },
+                studio,
+            );
+        } else {
+            self.install = None;
+            self.updating_all = false;
+            self.offer = None;
+            self.checked = false;
+            studio.notify(&t("settings.pluginsUpdated"), false);
+            self.check_updates(studio, false);
+        }
     }
 
     /// Fetches the chosen release's package for this machine on a worker,
@@ -1055,6 +1236,21 @@ impl SettingsPane {
             },
             version: env!("CARGO_PKG_VERSION").into(),
             update_status: self.update_status.as_str().into(),
+            plugin_status: plugin_status(self.offer.as_ref()).into(),
+            updates_available: self
+                .offer
+                .as_ref()
+                .map_or(0, |offer| {
+                    usize::from(offer.app) + offer.candidates().len()
+                }) as i32,
+            can_update_all: can_update_all(
+                self.offer.as_ref().is_some_and(|offer| offer.app),
+                self.offer
+                    .as_ref()
+                    .map_or(0, |offer| offer.candidates().len()),
+                self.checking || self.install.is_some(),
+            ),
+            updating_all: self.updating_all,
             checking: self.checking,
             version_choice: self.version_choice as i32,
             installing: self.install.is_some(),
@@ -1079,6 +1275,7 @@ impl SettingsPane {
             }
             .into(),
             can_install: self.install.is_none()
+                && !self.checking
                 && !self.releases.is_empty()
                 && updates::installed_as().is_ok(),
             install_note: updates::installed_as()
@@ -1088,6 +1285,49 @@ impl SettingsPane {
                 .into(),
         }
     }
+}
+
+/// Whether the combined action has work and no other update is running.
+fn can_update_all(app: bool, plugins: usize, busy: bool) -> bool {
+    !busy && (app || plugins > 0)
+}
+
+/// Invalid-package errors carry an ID; IO errors are matched to target
+/// paths separately by `AppliedPlugins::involves`.
+fn error_is_updated(error: &concat_effects::Error, updated: &HashSet<String>) -> bool {
+    match error {
+        concat_effects::Error::Invalid { id, .. } => updated.contains(id),
+        concat_effects::Error::Io { .. } => false,
+    }
+}
+
+/// Registered packages as readable rows, including why one cannot update.
+fn plugin_status(offer: Option<&UpdateOffer>) -> String {
+    offer
+        .map(|offer| {
+            offer
+                .plugins
+                .iter()
+                .map(|status| {
+                    let reason = match status.state {
+                        PluginState::Update => t("settings.pluginUpdateReady"),
+                        PluginState::Current => t("settings.pluginCurrent"),
+                        PluginState::NeedsApp(version) => {
+                            tf("settings.pluginNeedsApp", &[&version])
+                        }
+                        PluginState::NeedsFormat(format) => {
+                            tf("settings.pluginNeedsFormat", &[&format])
+                        }
+                    };
+                    format!(
+                        "{} · {} → {}\n{}",
+                        status.id, status.installed, status.available, reason
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n")
+        })
+        .unwrap_or_default()
 }
 
 /// Why the Install button is off, in words.
@@ -1269,6 +1509,25 @@ mod tests {
             })
             .contains("404")
         );
+    }
+
+    #[test]
+    fn update_all_is_enabled_for_either_kind_and_blocked_while_busy() {
+        assert!(can_update_all(true, 0, false));
+        assert!(can_update_all(false, 2, false));
+        assert!(!can_update_all(false, 0, false));
+        assert!(!can_update_all(true, 2, true));
+    }
+
+    #[test]
+    fn only_errors_from_the_updated_group_force_rollback() {
+        let updated: std::collections::HashSet<String> = ["yumo.one".to_owned()].into();
+        let invalid = |id: &str| concat_effects::Error::Invalid {
+            id: id.to_owned(),
+            message: "bad".to_owned(),
+        };
+        assert!(error_is_updated(&invalid("yumo.one"), &updated));
+        assert!(!error_is_updated(&invalid("local.broken"), &updated));
     }
 
     #[test]

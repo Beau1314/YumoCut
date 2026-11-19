@@ -2835,6 +2835,8 @@ pub enum Confirm {
     /// Restarting for a setting that is read only at launch: the project
     /// is saved, and opens again in the new window.
     Restart,
+    /// A newer app release or registered plugin update is ready.
+    UpdatesAvailable,
     /// The run before this one died, on a phone: said once, at launch,
     /// with its log to share (#560).
     #[cfg(target_os = "android")]

@@ -44,6 +44,7 @@ pub const FIRST_SWITCHABLE: Version = Version::new(0, 2, 5);
 /// covers years of releases at this pace.
 const RELEASES_PATH: &str = "/releases?per_page=100";
 
+/// The GitHub API endpoint listing YumoCut releases.
 pub fn releases_url() -> String {
     format!("https://api.github.com/repos/{REPO}{RELEASES_PATH}")
 }

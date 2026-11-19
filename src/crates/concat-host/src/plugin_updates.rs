@@ -21,19 +21,28 @@ const MAX_BYTES: u64 = 32 * 1024 * 1024;
 /// One file belonging to a plugin release.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PluginFile {
+    /// The package-relative path.
     pub path: String,
+    /// The release asset's verified HTTPS address.
     pub url: String,
+    /// The exact download size in bytes.
     pub bytes: u64,
+    /// The lowercase SHA-256 digest of the file.
     pub sha256: String,
 }
 
 /// A registered plugin in a YumoCut release catalog.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PluginEntry {
+    /// The stable package identifier.
     pub id: String,
+    /// The package's numeric release version.
     pub version: u32,
+    /// The package format read by this release.
     pub format: u32,
+    /// The oldest application version compatible with this package.
     pub min_app: Version,
+    /// Every file needed to reconstruct the package.
     pub files: Vec<PluginFile>,
 }
 
@@ -193,11 +202,11 @@ fn valid_download_url(url: &str) -> bool {
     }
     #[cfg(test)]
     {
-        return ["127.0.0.1", "localhost"].into_iter().any(|host| {
+        ["127.0.0.1", "localhost"].into_iter().any(|host| {
             url.strip_prefix(&format!("http://{host}"))
                 .and_then(|rest| rest.chars().next())
                 .is_some_and(|next| next == ':' || next == '/')
-        });
+        })
     }
     #[cfg(not(test))]
     {
@@ -208,37 +217,54 @@ fn valid_download_url(url: &str) -> bool {
 /// A readable installed user package, discovered without changing it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InstalledPlugin {
+    /// The package identifier from its manifest.
     pub id: String,
+    /// The installed numeric package version.
     pub version: u32,
+    /// The installed package format.
     pub format: u32,
+    /// The package's installation folder.
     pub folder: std::path::PathBuf,
 }
 
 /// Why a registered package can or cannot be updated by this build.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PluginState {
+    /// A compatible version newer than the installed package is available.
     Update,
+    /// The installed package is current.
     Current,
+    /// The package first requires the contained application version.
     NeedsApp(Version),
+    /// The package requires the contained newer package format.
     NeedsFormat(u32),
 }
 
 /// The installed and available state of one registered package.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PluginStatus {
+    /// The stable package identifier.
     pub id: String,
+    /// The installed numeric package version.
     pub installed: u32,
+    /// The numeric version in the release catalog.
     pub available: u32,
+    /// Whether and how this installation can use the catalog package.
     pub state: PluginState,
+    /// The validated catalog entry.
     pub entry: PluginEntry,
+    /// The installed package folder that an update would replace.
     pub target: std::path::PathBuf,
 }
 
 /// Everything a release offers this installation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UpdateOffer {
+    /// The selected application release.
     pub release: Release,
+    /// Whether the application itself is newer than this installation.
     pub app: bool,
+    /// The state of every installed package registered in the catalog.
     pub plugins: Vec<PluginStatus>,
 }
 
@@ -306,8 +332,11 @@ pub fn offer(release: Release, catalog: Vec<PluginEntry>, dir: &std::path::Path)
 /// A whole update downloaded and verified, but not yet installed.
 #[derive(Debug)]
 pub struct PreparedUpdate {
+    /// The release from which every package came.
     pub release: Release,
+    /// The downloaded application installer and its package type, if needed.
     pub app: Option<(std::path::PathBuf, updates::PackageKind)>,
+    /// The downloaded and verified plugin group.
     pub plugins: PreparedPlugins,
 }
 
@@ -372,10 +401,12 @@ pub struct PreparedPlugins {
 }
 
 impl PreparedPlugins {
+    /// The number of verified packages in this group.
     pub fn len(&self) -> usize {
         self.items.len()
     }
 
+    /// Whether this group contains no packages.
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }
@@ -605,10 +636,26 @@ fn apply_into(
         .map_err(|error| format!("could not create {}: {error}", transaction.display()))?;
     let mut records: Vec<AppliedPlugin> = Vec::with_capacity(items.len());
     for (index, item) in items.into_iter().enumerate() {
-        let attempt = || {
+        let attempt = || -> Result<(), String> {
             let new = transaction.join(format!("new-{index}"));
             let old = transaction.join(format!("old-{index}"));
             copy_tree(&item.staged, &new)?;
+            match std::fs::symlink_metadata(&old) {
+                Ok(_) => {
+                    return Err(format!(
+                        "could not move {} aside: {} already exists",
+                        item.target.display(),
+                        old.display()
+                    ));
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => {
+                    return Err(format!(
+                        "could not inspect backup {}: {error}",
+                        old.display()
+                    ));
+                }
+            }
             std::fs::rename(&item.target, &old).map_err(|error| {
                 format!("could not move {} aside: {error}", item.target.display())
             })?;
@@ -880,7 +927,7 @@ mod tests {
             .collect()
     }
 
-    fn static_server(files: Vec<(&str, Vec<u8>)>) -> (String, std::thread::JoinHandle<()>) {
+    fn static_server(files: Vec<(&'static str, Vec<u8>)>) -> (String, std::thread::JoinHandle<()>) {
         use std::io::{Read, Write};
         let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("listen");
         let base = format!("http://{}", listener.local_addr().expect("address"));
@@ -889,7 +936,7 @@ mod tests {
                 let (mut stream, _) = listener.accept().expect("request");
                 let mut request = [0_u8; 2048];
                 let _ = stream.read(&mut request).expect("read request");
-                assert!(request.starts_with(format!("GET {path} ").as_bytes()));
+                assert!(request.starts_with(format!("GET /{path} ").as_bytes()));
                 let head = format!(
                     "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
                     body.len()
@@ -1043,7 +1090,7 @@ mod tests {
         assert!(!prepared.is_empty());
         assert_eq!(progress.borrow().last(), Some(&(total, total)));
         assert_eq!(
-            installed_plugins(&installed.parent().expect("effects"))[0].version,
+            installed_plugins(installed.parent().expect("effects"))[0].version,
             1
         );
         drop(prepared);

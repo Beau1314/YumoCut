@@ -149,8 +149,7 @@ jobs:
     needs: select
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.select.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.select.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     # The slowest target is Intel macOS, whose build alone ran past an hour
     # in v0.2.7-rc.1. The steps that can hang have timeouts of their own,

@@ -7,7 +7,7 @@ id = "yumo.volume"
 name = "Yumo Volume"
 kind = "audio"
 category = "Volume"
-version = 2
+version = 3
 description = "A minimal registered audio effect for verified YumoCut plugin updates."
 
 [ffmpeg]

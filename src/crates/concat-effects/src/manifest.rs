@@ -177,6 +177,55 @@ pub struct Meta {
     /// A sentence for the tooltip.
     #[serde(default)]
     pub description: String,
+    /// Translations of `name`, `description` and `category`, by language
+    /// code: `[effect.i18n."zh-Hans"]`. A language absent or a field left
+    /// out reads as the English above.
+    #[serde(default)]
+    pub i18n: std::collections::HashMap<String, EffectI18n>,
+}
+
+/// The `[effect.i18n.<code>]` table: everything the catalogue and tooltips
+/// show about a package, in one language. Every field optional; an empty
+/// one falls back to the English of `[effect]`.
+#[derive(Deserialize, Clone, PartialEq, Debug, Default)]
+#[serde(deny_unknown_fields)]
+pub struct EffectI18n {
+    /// What the catalogue card says.
+    #[serde(default)]
+    pub name: String,
+    /// The shelf the card sits on.
+    #[serde(default)]
+    pub category: String,
+    /// A sentence for the tooltip.
+    #[serde(default)]
+    pub description: String,
+}
+
+impl Meta {
+    /// What the catalogue card says, in `lang` where the package carries
+    /// it and a non-empty line, else in English.
+    pub fn name_in(&self, lang: &str) -> &str {
+        self.i18n
+            .get(lang)
+            .and_then(|held| (!held.name.is_empty()).then_some(held.name.as_str()))
+            .unwrap_or(&self.name)
+    }
+
+    /// The tooltip sentence in `lang`, else in English.
+    pub fn description_in(&self, lang: &str) -> &str {
+        self.i18n
+            .get(lang)
+            .and_then(|held| (!held.description.is_empty()).then_some(held.description.as_str()))
+            .unwrap_or(&self.description)
+    }
+
+    /// The shelf in `lang`, else in English.
+    pub fn category_in(&self, lang: &str) -> &str {
+        self.i18n
+            .get(lang)
+            .and_then(|held| (!held.category.is_empty()).then_some(held.category.as_str()))
+            .unwrap_or(&self.category)
+    }
 }
 
 fn one() -> u32 {
@@ -252,6 +301,58 @@ pub struct Param {
     /// For `enum`: what each value is called, in `values` order.
     #[serde(default)]
     pub labels: Vec<String>,
+    /// Translations of `label`, `group` and `labels`, by language code:
+    /// `[param.i18n."zh-Hans"]`. A language absent or a field left out
+    /// reads as the English fields above.
+    #[serde(default)]
+    pub i18n: std::collections::HashMap<String, ParamI18n>,
+}
+
+/// The `[param.i18n.<code>]` table: one language's words for the control.
+/// Every field optional; an empty one falls back to the English of the
+/// `[[param]]` it belongs to. `labels`, where given, must be as long as
+/// `values` to be used; a shorter one is ignored rather than mixed.
+#[derive(Deserialize, Clone, PartialEq, Debug, Default)]
+#[serde(deny_unknown_fields)]
+pub struct ParamI18n {
+    /// What the control is labelled.
+    #[serde(default)]
+    pub label: String,
+    /// The subhead the control sits under.
+    #[serde(default)]
+    pub group: String,
+    /// For `enum`: what each value is called, in `values` order.
+    #[serde(default)]
+    pub labels: Vec<String>,
+}
+
+impl Param {
+    /// What the control is labelled in `lang` where it carries a
+    /// non-empty line, else in English.
+    pub fn label_in(&self, lang: &str) -> &str {
+        self.i18n
+            .get(lang)
+            .and_then(|held| (!held.label.is_empty()).then_some(held.label.as_str()))
+            .unwrap_or(&self.label)
+    }
+
+    /// The subhead in `lang`, else in English.
+    pub fn group_in(&self, lang: &str) -> &str {
+        self.i18n
+            .get(lang)
+            .and_then(|held| (!held.group.is_empty()).then_some(held.group.as_str()))
+            .unwrap_or(&self.group)
+    }
+
+    /// What each enum value is called in `lang`: the package's line for it
+    /// when it covers every value, else the English one.
+    pub fn labels_in(&self, lang: &str) -> &[String] {
+        self.i18n
+            .get(lang)
+            .filter(|held| held.labels.len() == self.labels.len())
+            .map(|held| held.labels.as_slice())
+            .unwrap_or(&self.labels)
+    }
 }
 
 fn unit() -> f64 {
@@ -854,6 +955,45 @@ mod tests {
         assert_eq!(manifest.params[0].kind, ParamType::Float);
         assert_eq!(manifest.params[0].step, 0.0);
         assert!(manifest.ffmpeg.is_some());
+    }
+
+    #[test]
+    fn a_manifest_carries_translations_and_falls_back() {
+        let source = r#"
+            [effect]
+            id = "concat.adjust"
+            name = "Adjust"
+            kind = "filter"
+            category = "Adjust"
+
+            [effect.i18n."zh-Hans"]
+            name = "调整"
+            description = "手动调色面板。"
+
+            [[param]]
+            key = "temperature"
+            label = "Temperature"
+            group = "Color"
+
+            [param.i18n."zh-Hans"]
+            label = "色温"
+            group = "色彩"
+
+            [ffmpeg]
+            chain = "eq=gamma={temperature}"
+        "#;
+        let manifest = Manifest::parse(source).expect("parses");
+        assert_eq!(manifest.effect.name_in("zh-Hans"), "调整");
+        assert_eq!(manifest.effect.description_in("zh-Hans"), "手动调色面板。");
+        assert_eq!(manifest.params[0].label_in("zh-Hans"), "色温");
+        assert_eq!(manifest.params[0].group_in("zh-Hans"), "色彩");
+        // A language nothing answers to, and a package with no
+        // translations, read as the English they fall back to.
+        assert_eq!(manifest.effect.name_in("xx"), "Adjust");
+        assert_eq!(manifest.params[0].label_in("xx"), "Temperature");
+        let plain = Manifest::parse(GOOD).expect("parses");
+        assert_eq!(plain.effect.name_in("zh-Hans"), "Blur");
+        assert_eq!(plain.params[0].label_in("zh-Hans"), "Radius");
     }
 
     fn rejects(source: &str, needle: &str) {

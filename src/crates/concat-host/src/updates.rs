@@ -176,9 +176,75 @@ fn github_message(value: &serde_json::Value) -> String {
         )
 }
 
-/// Asks GitHub for the releases; see [`releases_from_json`].
+/// The latest release's public manifest, without going through GitHub's
+/// rate-limited API. `releases/latest/download` follows GitHub's redirect to
+/// the current stable release, so this URL remains valid across releases.
+fn latest_manifest_url() -> String {
+    format!("https://github.com/{REPO}/releases/latest/download/manifest.json")
+}
+
+/// Reads the public latest-release manifest as a release. The schema,
+/// product and matching tag stop an unrelated or malformed document from
+/// being treated as a YumoCut update.
+fn release_from_latest_manifest(json: &str) -> Result<Release, String> {
+    let value: serde_json::Value = serde_json::from_str(json)
+        .map_err(|error| format!("the latest release manifest does not read as JSON: {error}"))?;
+    if value.get("schema").and_then(serde_json::Value::as_u64) != Some(2) {
+        return Err("the latest release manifest is not schema 2".to_owned());
+    }
+    if value.get("product").and_then(serde_json::Value::as_str) != Some("YumoCut") {
+        return Err("the latest release manifest is not for YumoCut".to_owned());
+    }
+    let version = value
+        .get("version")
+        .and_then(serde_json::Value::as_str)
+        .and_then(Version::parse)
+        .ok_or_else(|| "the latest release manifest has no plain version".to_owned())?;
+    let tag = value
+        .get("tag")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| "the latest release manifest has no tag".to_owned())?;
+    if tag != version.tag() {
+        return Err("the latest release manifest's version and tag disagree".to_owned());
+    }
+    if version < FIRST_SWITCHABLE {
+        return Err(format!(
+            "the latest release {version} is too old to switch to"
+        ));
+    }
+    Ok(Release {
+        version,
+        tag: tag.to_owned(),
+        published: String::new(),
+    })
+}
+
+/// Uses the release list when it is useful, and the public latest manifest
+/// when the API is rate-limited, unavailable, or returns no usable releases.
+fn fetch_releases_with(
+    mut api: impl FnMut() -> Result<Vec<Release>, String>,
+    mut latest: impl FnMut() -> Result<Release, String>,
+) -> Result<Vec<Release>, String> {
+    let api_error = match api() {
+        Ok(releases) if !releases.is_empty() => return Ok(releases),
+        Ok(_) => "the GitHub release list is empty".to_owned(),
+        Err(error) => error,
+    };
+    latest()
+        .map(|release| vec![release])
+        .map_err(|latest_error| {
+            format!("{api_error}; the latest release manifest also failed: {latest_error}")
+        })
+}
+
+/// Asks GitHub for the releases; see [`releases_from_json`]. If the
+/// rate-limited API cannot provide any, the public latest-release manifest
+/// still lets an installed build discover and fetch its update.
 pub fn fetch_releases() -> Result<Vec<Release>, String> {
-    releases_from_json(&get_text(&releases_url())?)
+    fetch_releases_with(
+        || releases_from_json(&get_text(&releases_url())?),
+        || release_from_latest_manifest(&get_text(&latest_manifest_url())?),
+    )
 }
 
 /// Where this build sits among the releases.
@@ -822,6 +888,79 @@ mod tests {
             .expect_err("refused");
         assert!(error.contains("rate limit"), "{error}");
         assert!(releases_from_json("not json").is_err());
+    }
+
+    const LATEST_MANIFEST: &str = r#"{
+        "schema": 2,
+        "product": "YumoCut",
+        "version": "0.2.13",
+        "tag": "v0.2.13",
+        "binaries": {}
+    }"#;
+
+    #[test]
+    fn the_public_latest_manifest_is_a_release_without_using_the_api() {
+        assert_eq!(
+            latest_manifest_url(),
+            "https://github.com/Beau1314/YumoCut/releases/latest/download/manifest.json"
+        );
+        assert_eq!(
+            release_from_latest_manifest(LATEST_MANIFEST).expect("reads"),
+            Release {
+                version: Version::new(0, 2, 13),
+                tag: "v0.2.13".to_owned(),
+                published: String::new(),
+            }
+        );
+        for invalid in [
+            LATEST_MANIFEST.replace(r#""schema": 2"#, r#""schema": 1"#),
+            LATEST_MANIFEST.replace("YumoCut", "Concat"),
+            LATEST_MANIFEST.replace("0.2.13", "0.2.4"),
+            LATEST_MANIFEST.replace(r#""tag": "v0.2.13""#, r#""tag": "v0.2.14""#),
+            "not json".to_owned(),
+        ] {
+            assert!(
+                release_from_latest_manifest(&invalid).is_err(),
+                "accepted {invalid}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_latest_manifest_is_only_a_fallback_for_an_unusable_api_answer() {
+        let release = Release {
+            version: Version::new(0, 2, 13),
+            tag: "v0.2.13".to_owned(),
+            published: String::new(),
+        };
+        let mut fallback_calls = 0;
+        let releases = fetch_releases_with(
+            || Ok(vec![release.clone()]),
+            || {
+                fallback_calls += 1;
+                panic!("a useful API answer must not fetch the fallback");
+            },
+        )
+        .expect("API releases");
+        assert_eq!(releases, vec![release.clone()]);
+        assert_eq!(fallback_calls, 0);
+
+        for api_answer in [Ok(Vec::new()), Err("API rate limit exceeded".to_owned())] {
+            let releases = fetch_releases_with(|| api_answer.clone(), || Ok(release.clone()))
+                .expect("public manifest fallback");
+            assert_eq!(releases, vec![release.clone()]);
+        }
+    }
+
+    #[test]
+    fn a_failed_fallback_reports_both_the_api_and_manifest_errors() {
+        let error = fetch_releases_with(
+            || Err("API rate limit exceeded".to_owned()),
+            || Err("manifest download failed".to_owned()),
+        )
+        .expect_err("both sources failed");
+        assert!(error.contains("API rate limit exceeded"), "{error}");
+        assert!(error.contains("manifest download failed"), "{error}");
     }
 
     #[test]

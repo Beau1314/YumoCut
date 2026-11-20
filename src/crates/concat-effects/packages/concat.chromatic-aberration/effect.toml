@@ -11,6 +11,11 @@ intensity = "shift"
 aliases = ["chromatic-aberration"]
 description = "Red and blue pulled apart towards the edges, the colour fringing of a cheap lens."
 
+[effect.i18n."zh-Hans"]
+name = "色差"
+description = "红与蓝向边缘分离，廉价镜头的色散条纹。"
+category = "变形"
+
 [[param]]
 key = "shift"
 label = "Shift"
@@ -20,6 +25,9 @@ max = 24
 default = 4
 step = 1
 unit = "px"
+
+[param.i18n."zh-Hans"]
+label = "偏移"
 
 [wgsl]
 entry = "effect.wgsl"

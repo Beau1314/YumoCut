@@ -9,6 +9,11 @@ order = 35
 intensity = "haze"
 description = "Soft cinema: blacks lifted, the light blooming warm, shadows a touch cool, skin kept. The look of a story told in a window seat."
 
+[effect.i18n."zh-Hans"]
+name = "靠窗座"
+description = "柔软的电影感：黑位抬起、光温暖地绽放、阴影微冷、肤色守住。靠窗座位上讲故事的样子。"
+category = "电影感"
+
 [[param]]
 key = "haze"
 label = "Haze"
@@ -18,6 +23,9 @@ default = 50
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "朦胧"
+
 [[param]]
 key = "warmth"
 label = "Warmth"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "暖度"
 
 [wgsl]
 entry = "effect.wgsl"

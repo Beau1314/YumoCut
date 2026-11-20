@@ -10,6 +10,11 @@ order = 76
 intensity = "size"
 description = "The picture reduced to a grid of black and white dots."
 
+[effect.i18n."zh-Hans"]
+name = "半调网点"
+description = "画面被简化为黑白网点阵列。"
+category = "复古"
+
 [[param]]
 key = "size"
 label = "Dot size"
@@ -19,6 +24,9 @@ max = 40
 default = 6
 step = 1
 unit = "px"
+
+[param.i18n."zh-Hans"]
+label = "点大小"
 
 [wgsl]
 entry = "effect.wgsl"

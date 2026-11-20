@@ -8,6 +8,11 @@ intensity = "gain"
 aliases = ["treble"]
 description = "More sparkle."
 
+[effect.i18n."zh-Hans"]
+name = "高音"
+description = "更多闪亮。"
+category = "音色"
+
 [[param]]
 key = "gain"
 label = "Gain"
@@ -16,6 +21,9 @@ max = 12
 default = 4
 step = 0.5
 unit = "dB"
+
+[param.i18n."zh-Hans"]
+label = "增益"
 
 [ffmpeg]
 chain = "treble=g={fixed(gain, 2)}:f=9000:w=0.7,alimiter=limit=0.95"

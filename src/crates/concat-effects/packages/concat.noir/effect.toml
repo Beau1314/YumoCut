@@ -8,6 +8,11 @@ category = "Cinematic"
 order = 50
 description = "Desaturated and heavy, with a cold cast into the shadows and the corners dimmed."
 
+[effect.i18n."zh-Hans"]
+name = "黑色电影"
+description = "低饱和而厚重，阴影里一道冷色，四角压暗。"
+category = "电影感"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

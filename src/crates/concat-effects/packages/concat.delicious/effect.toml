@@ -8,6 +8,11 @@ category = "Food"
 order = 54
 description = "Warm and saturated, the appetising push every food shot wants."
 
+[effect.i18n."zh-Hans"]
+name = "美味"
+description = "温暖而饱和，每一帧美食镜头想要的开胃推升。"
+category = "美食"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

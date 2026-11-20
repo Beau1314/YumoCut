@@ -8,6 +8,11 @@ intensity = "depth"
 aliases = ["submerged"]
 description = "Submerged beneath the surface with heavy low-pass filtering."
 
+[effect.i18n."zh-Hans"]
+name = "水下"
+description = "沉在水面之下，厚重的低通滤波。"
+category = "空间"
+
 [[param]]
 key = "depth"
 label = "Depth"
@@ -15,6 +20,9 @@ min = 1
 max = 10
 default = 5
 step = 0.5
+
+[param.i18n."zh-Hans"]
+label = "深度"
 
 [ffmpeg]
 chain = "lowpass=f={fixed(800 - depth * 40, 1)},equalizer=f=200:t=q:w=2.0:g={fixed(2 + depth * 0.3, 2)},alimiter=limit=0.92"

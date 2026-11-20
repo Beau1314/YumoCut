@@ -8,6 +8,11 @@ intensity = "gain"
 aliases = ["bright"]
 description = "Air and presence: a lift above six kilohertz."
 
+[effect.i18n."zh-Hans"]
+name = "明亮"
+description = "空气感与存在感：六千赫兹以上的提升。"
+category = "音色"
+
 [[param]]
 key = "gain"
 label = "Gain"
@@ -16,6 +21,9 @@ max = 12
 default = 5
 step = 0.5
 unit = "dB"
+
+[param.i18n."zh-Hans"]
+label = "增益"
 
 [ffmpeg]
 chain = "treble=g={fixed(gain, 2)}:f=6000:w=0.8,alimiter=limit=0.95"

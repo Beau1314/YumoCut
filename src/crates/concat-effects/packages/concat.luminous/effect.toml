@@ -9,6 +9,11 @@ order = 21
 intensity = "brighten"
 description = "Faces brightened and evened: skin lifted, reds calmed, the balance neutral, the rest of the frame left where it was."
 
+[effect.i18n."zh-Hans"]
+name = "透亮"
+description = "提亮并匀化面孔：肤色抬起、红色收敛、白平衡归中，画面其余原样。"
+category = "人像"
+
 [[param]]
 key = "brighten"
 label = "Brighten"
@@ -18,6 +23,9 @@ default = 50
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "提亮"
+
 [[param]]
 key = "even"
 label = "Even"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "匀化"
 
 [wgsl]
 entry = "effect.wgsl"

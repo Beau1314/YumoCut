@@ -8,6 +8,11 @@ category = "Film"
 order = 61
 description = "Muted highlights and deep, open shadows: the restrained look of a classic colour negative."
 
+[effect.i18n."zh-Hans"]
+name = "经典正片"
+description = "高光收敛、阴影深而不闷：经典彩色负片的克制质感。"
+category = "胶片"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

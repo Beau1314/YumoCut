@@ -8,6 +8,11 @@ category = "Light"
 order = 13
 description = "A wash of warm light flares across the frame and the next shot is left behind it as it passes."
 
+[effect.i18n."zh-Hans"]
+name = "漏光"
+description = "一片暖光掠过画面，身后留下下一个镜头。"
+category = "光线"
+
 [[param]]
 key = "warmth"
 label = "Warmth"
@@ -16,6 +21,9 @@ min = 0
 max = 100
 step = 1
 default = 70
+
+[param.i18n."zh-Hans"]
+label = "暖度"
 
 [transition]
 fallback = "cross-fade"

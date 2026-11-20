@@ -8,6 +8,11 @@ intensity = "size"
 aliases = ["room"]
 description = "The early reflections of a room."
 
+[effect.i18n."zh-Hans"]
+name = "房间"
+description = "一个房间的早期反射。"
+category = "空间"
+
 [[param]]
 key = "size"
 label = "Size"
@@ -16,6 +21,9 @@ max = 100
 default = 40
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "大小"
 
 [ffmpeg]
 let = [

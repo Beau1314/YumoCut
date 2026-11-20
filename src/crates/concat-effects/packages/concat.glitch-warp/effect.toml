@@ -8,6 +8,11 @@ category = "Glitch"
 order = 17
 description = "Chromatic slice tear and digital pixel displacement transition."
 
+[effect.i18n."zh-Hans"]
+name = "故障扭曲"
+description = "彩色切片撕裂与数字像素位移转场。"
+category = "故障"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -16,6 +21,9 @@ max = 100
 default = 75
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [transition]
 entry = "effect.wgsl"

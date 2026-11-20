@@ -8,6 +8,11 @@ category = "Portrait"
 order = 56
 description = "A soft pink lift into the highlights, flattering and warm."
 
+[effect.i18n."zh-Hans"]
+name = "玫瑰"
+description = "高光里一层柔和的粉，讨喜而温暖。"
+category = "人像"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

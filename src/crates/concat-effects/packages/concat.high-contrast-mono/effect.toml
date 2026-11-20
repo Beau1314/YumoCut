@@ -8,6 +8,11 @@ category = "Black & White"
 order = 64
 description = "Black and white pushed hard: deep blacks, bright whites, nothing in between."
 
+[effect.i18n."zh-Hans"]
+name = "高反差黑白"
+description = "黑白推到极限：死黑、亮白，中间不留余地。"
+category = "黑白"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

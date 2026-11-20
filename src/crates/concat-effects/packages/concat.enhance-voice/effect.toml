@@ -7,6 +7,11 @@ order = 42
 intensity = "amount"
 description = "Clears the room out of a recording: rumble, hiss, sibilance and uneven level."
 
+[effect.i18n."zh-Hans"]
+name = "人声增强"
+description = "把房间从录音里清出去：隆隆声、嘶声、齿音与忽大忽小的电平。"
+category = "清晰"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -15,6 +20,9 @@ max = 100
 default = 60
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [ffmpeg]
 chain = "highpass=f=80,afftdn=nf={fixed(0 - 25 - amount / 100 * 20, 1)}:nr={fixed(6 + amount / 100 * 18, 1)},deesser=i={fixed(amount / 100 * 0.5, 2)},acompressor=threshold={fixed(0.5 - amount / 100 * 0.3, 2)}:ratio={fixed(2 + amount / 100 * 2, 1)}:attack=15:release=120,alimiter=limit=0.95"

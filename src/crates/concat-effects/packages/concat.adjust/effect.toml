@@ -24,6 +24,11 @@ description = "The manual colour panel every picture clip carries: exposure, ton
 # a moderate setting, without clipping.
 version = 2
 
+[effect.i18n."zh-Hans"]
+name = "调整"
+description = "每段画面自带的手动调色面板：曝光、色调、平衡、锐度与边缘。"
+category = "调整"
+
 [[param]]
 key = "temperature"
 group = "Color"
@@ -33,6 +38,10 @@ max = 11000
 default = 6500
 step = 50
 unit = "K"
+
+[param.i18n."zh-Hans"]
+label = "色温"
+group = "色彩"
 
 [[param]]
 key = "tint"
@@ -44,6 +53,10 @@ default = 0
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "色调"
+group = "色彩"
+
 [[param]]
 key = "saturation"
 group = "Color"
@@ -53,6 +66,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "饱和度"
+group = "色彩"
 
 [[param]]
 key = "exposure"
@@ -64,6 +81,10 @@ default = 0
 step = 0.05
 unit = "EV"
 
+[param.i18n."zh-Hans"]
+label = "曝光"
+group = "光线"
+
 [[param]]
 key = "brightness"
 group = "Lightness"
@@ -73,6 +94,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "亮度"
+group = "光线"
 
 [[param]]
 key = "contrast"
@@ -84,6 +109,10 @@ default = 0
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "对比度"
+group = "光线"
+
 [[param]]
 key = "highlights"
 group = "Lightness"
@@ -93,6 +122,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "高光"
+group = "光线"
 
 [[param]]
 key = "shadows"
@@ -104,6 +137,10 @@ default = 0
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "阴影"
+group = "光线"
+
 [[param]]
 key = "whites"
 group = "Lightness"
@@ -113,6 +150,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "白色"
+group = "光线"
 
 [[param]]
 key = "blacks"
@@ -124,6 +165,10 @@ default = 0
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "黑色"
+group = "光线"
+
 [[param]]
 key = "sharpen"
 group = "Effects"
@@ -133,6 +178,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "锐化"
+group = "效果"
 
 [[param]]
 key = "fade"
@@ -144,6 +193,10 @@ default = 0
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "褪色"
+group = "效果"
+
 [[param]]
 key = "vignette"
 group = "Effects"
@@ -153,6 +206,10 @@ max = 100
 default = 0
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "暗角"
+group = "效果"
 
 [[param]]
 key = "lift"
@@ -165,6 +222,10 @@ default = 0
 step = 0.01
 animate = true
 
+[param.i18n."zh-Hans"]
+label = "提升"
+group = "色轮"
+
 [[param]]
 key = "gamma"
 group = "Wheels"
@@ -175,6 +236,10 @@ max = 1
 default = 0
 step = 0.01
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "伽马"
+group = "色轮"
 
 [[param]]
 key = "gain"
@@ -187,11 +252,19 @@ default = 0
 step = 0.01
 animate = true
 
+[param.i18n."zh-Hans"]
+label = "增益"
+group = "色轮"
+
 [[param]]
 key = "luma"
 group = "Curves"
 label = "Luma"
 type = "curve"
+
+[param.i18n."zh-Hans"]
+label = "亮度"
+group = "曲线"
 
 [[param]]
 key = "red"
@@ -199,17 +272,29 @@ group = "Curves"
 label = "Red"
 type = "curve"
 
+[param.i18n."zh-Hans"]
+label = "红"
+group = "曲线"
+
 [[param]]
 key = "green"
 group = "Curves"
 label = "Green"
 type = "curve"
 
+[param.i18n."zh-Hans"]
+label = "绿"
+group = "曲线"
+
 [[param]]
 key = "blue"
 group = "Curves"
 label = "Blue"
 type = "curve"
+
+[param.i18n."zh-Hans"]
+label = "蓝"
+group = "曲线"
 
 [wgsl]
 entry = "effect.wgsl"

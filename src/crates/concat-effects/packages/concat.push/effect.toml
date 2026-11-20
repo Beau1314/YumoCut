@@ -9,6 +9,11 @@ order = 5
 aliases = ["push"]
 description = "The next shot shoves the last one out of frame, both moving as one, with a streak of motion blur at full speed."
 
+[effect.i18n."zh-Hans"]
+name = "推挤"
+description = "下一个镜头把上一个挤出画面，两者一体运动，全速时拖出一道运动模糊。"
+category = "滑动"
+
 [[param]]
 key = "direction"
 label = "Direction"
@@ -18,6 +23,10 @@ labels = ["Left", "Right", "Up", "Down"]
 default = 0
 min = 0
 max = 3
+
+[param.i18n."zh-Hans"]
+label = "方向"
+labels = ["向左", "向右", "向上", "向下"]
 
 [transition]
 fallback = "cross-fade"

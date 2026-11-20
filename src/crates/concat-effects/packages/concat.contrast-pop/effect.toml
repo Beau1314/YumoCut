@@ -10,6 +10,11 @@ intensity = "contrast"
 aliases = ["contrast-pop"]
 description = "Deeper shadows, brighter highlights."
 
+[effect.i18n."zh-Hans"]
+name = "对比增强"
+description = "阴影更深，高光更亮。"
+category = "色彩"
+
 [[param]]
 key = "contrast"
 label = "Contrast"
@@ -17,6 +22,9 @@ min = 1
 max = 2
 default = 1.25
 step = 0.05
+
+[param.i18n."zh-Hans"]
+label = "对比度"
 
 [wgsl]
 entry = "effect.wgsl"

@@ -9,6 +9,11 @@ order = 41
 intensity = "fade"
 description = "The instant print: a cream matte, warm highlights, cyan creeping into the shadows, a little softness in the corners."
 
+[effect.i18n."zh-Hans"]
+name = "即显照片"
+description = "一次成像：米白边框、温暖的高光、爬进阴影的青、四角一点柔化。"
+category = "复古"
+
 [[param]]
 key = "fade"
 label = "Fade"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "褪色"
+
 [[param]]
 key = "warmth"
 label = "Warmth"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "暖度"
 
 [wgsl]
 entry = "effect.wgsl"

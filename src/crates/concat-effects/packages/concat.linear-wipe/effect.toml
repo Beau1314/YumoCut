@@ -9,6 +9,11 @@ order = 10
 aliases = ["wipe-left", "wipe-right"]
 description = "A straight line crosses the frame and leaves the next shot behind it."
 
+[effect.i18n."zh-Hans"]
+name = "线性擦除"
+description = "一条直线划过画面，身后留下下一个镜头。"
+category = "擦除"
+
 [[param]]
 key = "direction"
 label = "Direction"
@@ -19,6 +24,10 @@ default = 0
 min = 0
 max = 3
 
+[param.i18n."zh-Hans"]
+label = "方向"
+labels = ["从左到右", "从右到左", "从上到下", "从下到上"]
+
 [[param]]
 key = "softness"
 label = "Softness"
@@ -27,6 +36,9 @@ min = 0
 max = 100
 step = 1
 default = 20
+
+[param.i18n."zh-Hans"]
+label = "柔和度"
 
 [transition]
 fallback = "cross-fade"

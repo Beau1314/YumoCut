@@ -9,6 +9,11 @@ order = 45
 intensity = "flash"
 description = "The 2000s point-and-shoot: hard flash, whites blown, colour up, a cool cyan cast, over-sharpened with the sensor's noise."
 
+[effect.i18n."zh-Hans"]
+name = "卡片机"
+description = "两千年代的傻瓜相机：硬闪光、曝掉的白、拉高的色彩、一道冷青、过度锐化加传感器的噪点。"
+category = "复古"
+
 [[param]]
 key = "flash"
 label = "Flash"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "闪光"
+
 [[param]]
 key = "noise"
 label = "Noise"
@@ -26,6 +34,9 @@ max = 100
 default = 40
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "噪点"
 
 [wgsl]
 entry = "effect.wgsl"

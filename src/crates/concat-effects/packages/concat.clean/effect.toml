@@ -9,6 +9,11 @@ order = 12
 intensity = "amount"
 description = "Barely there: neutral, a gentle curve, a touch more colour, and the reds calmed so a face reads even. What a talking head wants."
 
+[effect.i18n."zh-Hans"]
+name = "洁净"
+description = "若有似无：中性、一条轻曲线、色彩略增，红色收敛让脸色均匀。口播人像想要的就是它。"
+category = "日常"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -17,6 +22,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [wgsl]
 entry = "effect.wgsl"

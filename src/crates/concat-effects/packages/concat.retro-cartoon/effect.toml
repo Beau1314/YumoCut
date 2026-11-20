@@ -9,6 +9,11 @@ order = 55
 intensity = "ink"
 description = "Flat bands of colour with inked edges, like a printed comic."
 
+[effect.i18n."zh-Hans"]
+name = "复古卡通"
+description = "平涂色带加描边，像印刷漫画。"
+category = "风格化"
+
 [[param]]
 key = "levels"
 label = "Levels"
@@ -16,6 +21,9 @@ min = 2
 max = 8
 default = 5
 step = 1
+
+[param.i18n."zh-Hans"]
+label = "色阶"
 
 [[param]]
 key = "ink"
@@ -25,6 +33,9 @@ max = 100
 default = 60
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "描边"
 
 [wgsl]
 entry = "effect.wgsl"

@@ -8,6 +8,11 @@ category = "Scenery"
 order = 58
 description = "Greens pulled toward amber, the picture dipped in fall light."
 
+[effect.i18n."zh-Hans"]
+name = "秋日"
+description = "绿色被拉向琥珀色，画面浸在秋光里。"
+category = "风景"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

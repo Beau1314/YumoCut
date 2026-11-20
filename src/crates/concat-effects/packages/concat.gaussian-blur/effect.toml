@@ -11,6 +11,11 @@ intensity = "radius"
 aliases = ["gaussian-blur"]
 description = "A soft, even blur."
 
+[effect.i18n."zh-Hans"]
+name = "高斯模糊"
+description = "柔和而均匀的模糊。"
+category = "模糊"
+
 [[param]]
 key = "radius"
 label = "Radius"
@@ -19,6 +24,9 @@ max = 50
 default = 10
 step = 1
 unit = "px"
+
+[param.i18n."zh-Hans"]
+label = "半径"
 
 [wgsl]
 entry = "effect.wgsl"

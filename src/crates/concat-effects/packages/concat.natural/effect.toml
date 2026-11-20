@@ -8,6 +8,11 @@ category = "Portrait"
 order = 55
 description = "A gentle, true-to-life lift: barely-there warmth, skin left alone."
 
+[effect.i18n."zh-Hans"]
+name = "自然"
+description = "一次轻柔而真实的提升：若有似无的暖，肤色不动。"
+category = "人像"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

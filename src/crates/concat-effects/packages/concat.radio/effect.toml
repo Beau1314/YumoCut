@@ -8,6 +8,11 @@ intensity = "noise"
 aliases = ["radio"]
 description = "A small speaker on a long wave: narrow band, a little crunch."
 
+[effect.i18n."zh-Hans"]
+name = "收音机"
+description = "长波上的小喇叭：窄频带，一点沙沙声。"
+category = "音色"
+
 [[param]]
 key = "noise"
 label = "Noise"
@@ -16,6 +21,9 @@ max = 100
 default = 30
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "噪声"
 
 [ffmpeg]
 let = [

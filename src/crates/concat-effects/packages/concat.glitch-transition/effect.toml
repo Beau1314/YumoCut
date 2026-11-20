@@ -8,6 +8,11 @@ category = "Glitch"
 order = 8
 description = "The picture breaks into torn bands that jump sideways and flicker between the two shots until the next one holds."
 
+[effect.i18n."zh-Hans"]
+name = "故障"
+description = "画面撕裂成横带左右跳动、在两个镜头间闪烁，直到下一个镜头稳住。"
+category = "故障"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -16,6 +21,9 @@ min = 0
 max = 100
 step = 1
 default = 70
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [transition]
 fallback = "cross-fade"

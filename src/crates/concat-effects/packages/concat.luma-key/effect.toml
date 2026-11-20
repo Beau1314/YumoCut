@@ -9,6 +9,11 @@ order = 59
 intensity = "threshold"
 description = "Keys out the dark of the picture - fire, smoke or sparks shot on black - or, inverted, the light."
 
+[effect.i18n."zh-Hans"]
+name = "亮度键控"
+description = "抠掉画面里的暗部——黑底拍的火、烟或火花——反转则抠亮部。"
+category = "抠像"
+
 [[param]]
 key = "threshold"
 label = "Threshold"
@@ -17,6 +22,9 @@ max = 100
 default = 10
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "阈值"
 
 [[param]]
 key = "softness"
@@ -27,6 +35,9 @@ default = 10
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "柔和度"
+
 [[param]]
 key = "invert"
 label = "Invert"
@@ -35,6 +46,9 @@ min = 0
 max = 1
 default = 0
 step = 1
+
+[param.i18n."zh-Hans"]
+label = "反转"
 
 [wgsl]
 entry = "effect.wgsl"

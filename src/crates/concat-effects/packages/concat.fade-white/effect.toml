@@ -9,6 +9,11 @@ order = 2
 aliases = ["fade-white"]
 description = "The outgoing shot fades up to white, then the incoming one fades down out of it."
 
+[effect.i18n."zh-Hans"]
+name = "淡入白场"
+description = "前一镜头淡上到白，后一镜头再从白里淡下。"
+category = "基础"
+
 [transition]
 entry = "effect.wgsl"
 fallback = "cross-fade"

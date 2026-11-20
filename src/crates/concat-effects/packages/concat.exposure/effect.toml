@@ -9,6 +9,11 @@ order = 10
 intensity = "stops"
 description = "Brighter or darker by stops of light, as the lens would make it, highlights kept."
 
+[effect.i18n."zh-Hans"]
+name = "曝光"
+description = "按光圈档位增减明暗，如镜头所做的那样，高光保留。"
+category = "色彩"
+
 [[param]]
 key = "stops"
 label = "Exposure"
@@ -18,6 +23,9 @@ default = 0
 step = 0.05
 unit = "EV"
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "曝光"
 
 [wgsl]
 entry = "effect.wgsl"

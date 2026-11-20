@@ -8,6 +8,11 @@ category = "Film"
 order = 63
 description = "A heavy warm fade with a yellowed, sun-bleached cast."
 
+[effect.i18n."zh-Hans"]
+name = "复古 70 年代"
+description = "厚重的暖褪色，带着晒黄的日光色调。"
+category = "胶片"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

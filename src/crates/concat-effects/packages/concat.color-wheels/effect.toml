@@ -8,6 +8,11 @@ category = "Color"
 order = 14
 description = "Lift, gamma and gain: the shadows, midtones and highlights each pushed towards a hue and made brighter or darker."
 
+[effect.i18n."zh-Hans"]
+name = "色轮"
+description = "提升、伽马与增益：阴影、中间调与高光各自推向某个色相，并整体提亮或压暗。"
+category = "色彩"
+
 [[param]]
 key = "lift"
 group = "Wheels"
@@ -18,6 +23,10 @@ max = 1
 default = 0
 step = 0.01
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "提升"
+group = "色轮"
 
 [[param]]
 key = "gamma"
@@ -30,6 +39,10 @@ default = 0
 step = 0.01
 animate = true
 
+[param.i18n."zh-Hans"]
+label = "伽马"
+group = "色轮"
+
 [[param]]
 key = "gain"
 group = "Wheels"
@@ -40,6 +53,10 @@ max = 1
 default = 0
 step = 0.01
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "增益"
+group = "色轮"
 
 [wgsl]
 entry = "effect.wgsl"

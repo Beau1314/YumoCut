@@ -11,6 +11,11 @@ version = 2
 intensity = "amount"
 description = "A soft bloom over the highlights that breathes in and out."
 
+[effect.i18n."zh-Hans"]
+name = "光晕脉动"
+description = "高光上一团柔光晕随呼吸般起伏。"
+category = "光线"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -20,6 +25,9 @@ default = 50
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "程度"
+
 [[param]]
 key = "speed"
 label = "Speed"
@@ -27,6 +35,9 @@ min = 0.5
 max = 5
 default = 2
 step = 0.1
+
+[param.i18n."zh-Hans"]
+label = "速度"
 
 [wgsl]
 entry = "effect.wgsl"

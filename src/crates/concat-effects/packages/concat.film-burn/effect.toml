@@ -8,6 +8,11 @@ category = "Dissolve"
 order = 2
 description = "A warm over-exposed flash burns through the cut."
 
+[effect.i18n."zh-Hans"]
+name = "胶片过曝"
+description = "一道温暖的过曝闪光烧穿切换点。"
+category = "溶解"
+
 [[param]]
 key = "heat"
 label = "Heat"
@@ -16,6 +21,9 @@ max = 100
 default = 70
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "热度"
 
 [transition]
 entry = "effect.wgsl"

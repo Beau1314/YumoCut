@@ -9,6 +9,11 @@ order = 11
 intensity = "colour"
 description = "Colour that sings and contrast that bites, with a little edge: the look that reads as a better camera. Skin is held back from the boost."
 
+[effect.i18n."zh-Hans"]
+name = "鲜明"
+description = "唱得响的色彩与咬得住的对比，外加一点锋利：读起来像一台更好的相机。肤色不参与提升。"
+category = "日常"
+
 [[param]]
 key = "colour"
 label = "Colour"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "色彩"
+
 [[param]]
 key = "punch"
 label = "Punch"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "冲击"
 
 [wgsl]
 entry = "effect.wgsl"

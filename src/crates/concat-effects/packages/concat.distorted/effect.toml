@@ -7,6 +7,11 @@ order = 26
 intensity = "drive"
 description = "Driven hard and clipped."
 
+[effect.i18n."zh-Hans"]
+name = "失真"
+description = "推得很狠并削顶。"
+category = "音色"
+
 [[param]]
 key = "drive"
 label = "Drive"
@@ -15,6 +20,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "驱动"
 
 [ffmpeg]
 chain = "volume={fixed(1 + drive / 100 * 7, 2)},acrusher=bits=6:mode=lin:mix={fixed(drive / 100 * 0.7, 2)},alimiter=limit=0.85:level=false"

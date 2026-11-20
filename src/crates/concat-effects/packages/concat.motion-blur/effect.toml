@@ -11,6 +11,11 @@ intensity = "length"
 aliases = ["motion-blur"]
 description = "A streak along a line, as if the camera panned."
 
+[effect.i18n."zh-Hans"]
+name = "运动模糊"
+description = "沿一条线的拖影，像镜头摇了过去。"
+category = "模糊"
+
 [[param]]
 key = "length"
 label = "Length"
@@ -20,6 +25,9 @@ default = 18
 step = 1
 unit = "px"
 
+[param.i18n."zh-Hans"]
+label = "长度"
+
 [[param]]
 key = "angle"
 label = "Angle"
@@ -28,6 +36,9 @@ max = 90
 default = 0
 step = 1
 unit = "°"
+
+[param.i18n."zh-Hans"]
+label = "角度"
 
 [wgsl]
 entry = "effect.wgsl"

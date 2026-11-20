@@ -8,6 +8,11 @@ category = "Black & White"
 order = 65
 description = "A cool, soft black and white with the shadows lifted, like a silver print."
 
+[effect.i18n."zh-Hans"]
+name = "银盐"
+description = "冷调柔和的黑白，阴影提起，像一张银盐照片。"
+category = "黑白"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

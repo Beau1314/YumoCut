@@ -9,6 +9,11 @@ order = 5
 intensity = "amount"
 description = "One hard hit when the clip or layer starts: the frame jolts, punches in and rings out. Drop it on the beat."
 
+[effect.i18n."zh-Hans"]
+name = "冲击"
+description = "片段或图层开始时的一次重击：画面一震、推进并泛起涟漪。放在节拍上用。"
+category = "抖动"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -17,6 +22,9 @@ min = 0
 max = 100
 step = 1
 default = 60
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [[param]]
 key = "length"
@@ -27,6 +35,9 @@ max = 2
 step = 0.05
 default = 0.45
 
+[param.i18n."zh-Hans"]
+label = "时长"
+
 [[param]]
 key = "punch"
 label = "Zoom Punch"
@@ -35,6 +46,9 @@ min = 0
 max = 100
 step = 1
 default = 40
+
+[param.i18n."zh-Hans"]
+label = "变焦冲击"
 
 [[param]]
 key = "direction"
@@ -46,6 +60,10 @@ default = 0
 min = 0
 max = 2
 
+[param.i18n."zh-Hans"]
+label = "方向"
+labels = ["任意", "左右", "上下"]
+
 [[param]]
 key = "blur"
 label = "Motion Blur"
@@ -54,6 +72,9 @@ min = 0
 max = 100
 step = 1
 default = 60
+
+[param.i18n."zh-Hans"]
+label = "运动模糊"
 
 [wgsl]
 entry = "effect.wgsl"

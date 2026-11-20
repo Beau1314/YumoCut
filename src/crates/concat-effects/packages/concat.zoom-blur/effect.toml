@@ -9,6 +9,11 @@ order = 23
 intensity = "amount"
 description = "A rush towards a point, as if the lens zoomed during the shot."
 
+[effect.i18n."zh-Hans"]
+name = "缩放模糊"
+description = "向一点的冲刺，像镜头在拍摄中变焦。"
+category = "模糊"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -19,6 +24,9 @@ step = 1
 unit = "%"
 animate = true
 
+[param.i18n."zh-Hans"]
+label = "程度"
+
 [[param]]
 key = "x"
 label = "Centre X"
@@ -28,6 +36,9 @@ default = 50
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "中心 X"
+
 [[param]]
 key = "y"
 label = "Centre Y"
@@ -36,6 +47,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "中心 Y"
 
 [wgsl]
 entry = "effect.wgsl"

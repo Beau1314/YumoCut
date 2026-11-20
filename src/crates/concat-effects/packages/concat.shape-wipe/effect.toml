@@ -8,6 +8,11 @@ category = "Wipe"
 order = 12
 description = "The next shot shows through a circle, heart or star that grows from the centre until it covers the frame."
 
+[effect.i18n."zh-Hans"]
+name = "形状擦除"
+description = "下一个镜头从一个圆、心或星里透出来，形状从中心长大直到盖满画面。"
+category = "擦除"
+
 [[param]]
 key = "shape"
 label = "Shape"
@@ -18,6 +23,10 @@ default = 0
 min = 0
 max = 2
 
+[param.i18n."zh-Hans"]
+label = "形状"
+labels = ["圆形", "心形", "星形"]
+
 [[param]]
 key = "softness"
 label = "Softness"
@@ -26,6 +35,9 @@ min = 0
 max = 100
 step = 1
 default = 15
+
+[param.i18n."zh-Hans"]
+label = "柔和度"
 
 [transition]
 fallback = "cross-fade"

@@ -9,6 +9,11 @@ order = 11
 intensity = "amount"
 description = "More or less contrast in stops about middle grey, highlights past white kept and black never crushed."
 
+[effect.i18n."zh-Hans"]
+name = "对比度"
+description = "围绕中灰按档位增减对比，超高光保留，黑位从不压死。"
+category = "色彩"
+
 [[param]]
 key = "amount"
 label = "Contrast"
@@ -18,6 +23,9 @@ default = 0
 step = 1
 unit = "%"
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "对比度"
 
 [wgsl]
 entry = "effect.wgsl"

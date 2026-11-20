@@ -9,6 +9,11 @@ order = 50
 intensity = "haze"
 description = "Low contrast, pink and lavender in the light, and a soft bloom over it all. The dreamy one."
 
+[effect.i18n."zh-Hans"]
+name = "粉雾"
+description = "低对比、亮部里的粉与薰衣草，再罩一层柔光。最梦幻的那个。"
+category = "风格化"
+
 [[param]]
 key = "haze"
 label = "Haze"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "朦胧"
+
 [[param]]
 key = "blush"
 label = "Blush"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "红润"
 
 [wgsl]
 entry = "effect.wgsl"

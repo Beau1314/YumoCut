@@ -8,6 +8,11 @@ category = "Wipe"
 order = 14
 description = "The camera whips sideways so fast the frame smears, and lands on the next shot."
 
+[effect.i18n."zh-Hans"]
+name = "甩镜"
+description = "相机横甩快到拖影，落定时已是下一个镜头。"
+category = "擦除"
+
 [[param]]
 key = "speed"
 label = "Speed"
@@ -16,6 +21,9 @@ min = 20
 max = 100
 step = 1
 default = 80
+
+[param.i18n."zh-Hans"]
+label = "速度"
 
 [transition]
 fallback = "slideleft"

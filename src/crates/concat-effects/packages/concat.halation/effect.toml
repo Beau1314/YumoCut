@@ -11,6 +11,11 @@ intensity = "amount"
 aliases = ["halation"]
 description = "The red-orange halo film lays around its blown highlights, where light passes through the emulsion, scatters off the backing and comes back."
 
+[effect.i18n."zh-Hans"]
+name = "光渗"
+description = "胶片在过曝高光周围铺下的橙红光晕——光穿过乳剂、从片基散射回来的样子。"
+category = "胶片"
+
 [[param]]
 key = "threshold"
 label = "Threshold"
@@ -19,6 +24,9 @@ max = 95
 default = 55
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "阈值"
 
 [[param]]
 key = "radius"
@@ -29,6 +37,9 @@ default = 22
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "半径"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -37,6 +48,9 @@ max = 100
 default = 45
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [[param]]
 key = "tint"
@@ -50,6 +64,9 @@ unit = "%"
 # key, and the manifest denies unknown fields): negative is the deep red of
 # a dense negative, positive the orange of a print, zero the red-orange of
 # the stock.
+
+[param.i18n."zh-Hans"]
+label = "色调"
 
 [wgsl]
 entry = "effect.wgsl"

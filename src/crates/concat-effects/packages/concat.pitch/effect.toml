@@ -7,6 +7,11 @@ order = 10
 intensity = "semitones"
 description = "Up or down by semitones, the length untouched."
 
+[effect.i18n."zh-Hans"]
+name = "音高"
+description = "按半音升降，长度不变。"
+category = "人声"
+
 [[param]]
 key = "semitones"
 label = "Semitones"
@@ -15,6 +20,9 @@ max = 12
 default = 0
 step = 0.5
 unit = "st"
+
+[param.i18n."zh-Hans"]
+label = "半音"
 
 [ffmpeg]
 let = [

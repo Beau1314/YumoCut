@@ -8,6 +8,11 @@ category = "Wipe"
 order = 15
 description = "A hand sweeps once round the face of the frame from twelve, leaving the next shot behind it."
 
+[effect.i18n."zh-Hans"]
+name = "时钟擦除"
+description = "指针从十二点起绕表盘扫一圈，身后留下下一个镜头。"
+category = "擦除"
+
 [transition]
 fallback = "cross-fade"
 xfade = "radial"

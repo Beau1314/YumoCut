@@ -7,6 +7,11 @@ order = 25
 intensity = "bits"
 description = "A small old speaker: no top end, and a grain to the sound."
 
+[effect.i18n."zh-Hans"]
+name = "低保真"
+description = "一只小小的老喇叭：没有高频，声音里带着颗粒。"
+category = "音色"
+
 [[param]]
 key = "bits"
 label = "Bits"
@@ -14,6 +19,9 @@ min = 4
 max = 12
 default = 8
 step = 1
+
+[param.i18n."zh-Hans"]
+label = "量化位数"
 
 [ffmpeg]
 chain = "lowpass=f=3200,acrusher=bits={round(bits)}:mode=log:mix=0.8,alimiter=limit=0.9"

@@ -7,6 +7,11 @@ order = 40
 intensity = "target"
 description = "Brings the whole clip to one loudness, the way broadcast and the platforms expect."
 
+[effect.i18n."zh-Hans"]
+name = "响度标准化"
+description = "把整段素材拉到同一个响度，广播与平台期待的样子。"
+category = "清晰"
+
 [[param]]
 key = "target"
 label = "Target"
@@ -15,6 +20,9 @@ max = -12
 default = -23
 step = 1
 unit = "dB"
+
+[param.i18n."zh-Hans"]
+label = "目标"
 
 [ffmpeg]
 chain = "loudnorm=I={fixed(target, 1)}:TP=-1.5:LRA=11"

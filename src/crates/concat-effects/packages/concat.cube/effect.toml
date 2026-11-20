@@ -8,6 +8,11 @@ category = "Spin"
 order = 14
 description = "The two shots are neighbouring faces of a box that turns a quarter of the way round, with the turning-away face falling into shade."
 
+[effect.i18n."zh-Hans"]
+name = "立方"
+description = "两个镜头是相邻的两个箱面，箱子转四分之一圈，转离的那面渐渐没入阴影。"
+category = "旋转"
+
 [transition]
 fallback = "cross-fade"
 entry = "effect.wgsl"

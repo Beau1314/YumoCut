@@ -8,6 +8,11 @@ intensity = "gain"
 aliases = ["bass"]
 description = "More low end."
 
+[effect.i18n."zh-Hans"]
+name = "低音"
+description = "更多低频。"
+category = "音色"
+
 [[param]]
 key = "gain"
 label = "Gain"
@@ -16,6 +21,9 @@ max = 12
 default = 5
 step = 0.5
 unit = "dB"
+
+[param.i18n."zh-Hans"]
+label = "增益"
 
 [ffmpeg]
 chain = "bass=g={fixed(gain, 2)}:f=110:w=0.6,alimiter=limit=0.95"

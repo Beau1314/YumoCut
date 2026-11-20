@@ -11,6 +11,11 @@ intensity = "size"
 aliases = ["pixelate"]
 description = "Big square pixels."
 
+[effect.i18n."zh-Hans"]
+name = "像素化"
+description = "大大的方块像素。"
+category = "变形"
+
 [[param]]
 key = "size"
 label = "Size"
@@ -20,6 +25,9 @@ max = 64
 default = 16
 step = 1
 unit = "px"
+
+[param.i18n."zh-Hans"]
+label = "大小"
 
 [wgsl]
 entry = "effect.wgsl"

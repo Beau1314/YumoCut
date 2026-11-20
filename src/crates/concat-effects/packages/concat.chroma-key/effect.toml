@@ -13,6 +13,11 @@ description = "Keys out a green or blue screen - found by itself, or the colour 
 # The screen's colour, as picked. Left at its default, which is no colour at
 # all (an alpha of zero), the key finds the screen in the picture itself: the
 # commonest strongly green or strongly blue colour in it.
+[effect.i18n."zh-Hans"]
+name = "色度键控"
+description = "抠掉绿幕或蓝幕——自动识别，也可从画面取色——即使布光不匀也能应对，并清理边缘杂色与主体溢色。黑底请改用“去除黑色”。"
+category = "抠像"
+
 [[param]]
 key = "color"
 label = "Key colour"
@@ -23,6 +28,9 @@ default = 0
 
 # How hard the screen is taken out: 100 % takes out exactly the screen's
 # colour, more takes out what is less of it too.
+[param.i18n."zh-Hans"]
+label = "键控色"
+
 [[param]]
 key = "strength"
 label = "Strength"
@@ -35,6 +43,9 @@ unit = "%"
 # How much darker than the key colour a patch of screen may be - a shadow,
 # a fold, a corner the lights miss - and still go, measured against the
 # screen around it rather than the one colour.
+[param.i18n."zh-Hans"]
+label = "强度"
+
 [[param]]
 key = "shadows"
 label = "Shadows"
@@ -47,6 +58,9 @@ unit = "%"
 # Which of the two other channels the screen's own is measured against: at
 # 50 % the larger of them, so neither a yellow nor a cyan is mistaken for
 # the screen; towards 0 % or 100 % the one or the other.
+[param.i18n."zh-Hans"]
+label = "阴影"
+
 [[param]]
 key = "balance"
 label = "Balance"
@@ -59,6 +73,9 @@ unit = "%"
 # The matte's levels: what is screen up to `clip_black` goes, and what is
 # subject from `clip_white` stays whole, so grain on the screen and a touch
 # of spill on the subject do not read as see-through.
+[param.i18n."zh-Hans"]
+label = "平衡"
+
 [[param]]
 key = "clip_black"
 label = "Clip black"
@@ -67,6 +84,9 @@ max = 50
 default = 10
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "黑切割"
 
 [[param]]
 key = "clip_white"
@@ -79,6 +99,9 @@ unit = "%"
 
 # The matte's edge drawn in or let out, and softened, in pixels of a 1080
 # line picture, so a 4K clip and its half-size preview keep the same edge.
+[param.i18n."zh-Hans"]
+label = "白切割"
+
 [[param]]
 key = "grow"
 label = "Shrink / grow"
@@ -87,6 +110,9 @@ max = 10
 default = 0
 step = 0.5
 unit = "px"
+
+[param.i18n."zh-Hans"]
+label = "收缩 / 扩展"
 
 [[param]]
 key = "feather"
@@ -99,6 +125,9 @@ unit = "px"
 
 # The screen's colour cast cleaned off what stays, and the light it took
 # given back as grey, so a face or a shirt keeps its brightness.
+[param.i18n."zh-Hans"]
+label = "边缘柔和"
+
 [[param]]
 key = "spill"
 label = "Spill"
@@ -107,6 +136,9 @@ max = 100
 default = 100
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "溢色抑制"
 
 [[param]]
 key = "restore"
@@ -117,6 +149,9 @@ default = 100
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "保留亮度"
+
 [[param]]
 key = "view"
 label = "View"
@@ -126,6 +161,10 @@ max = 2
 default = 0
 values = [0, 1, 2]
 labels = ["Result", "Matte", "Status"]
+
+[param.i18n."zh-Hans"]
+label = "视图"
+labels = ["结果", "遮罩", "状态"]
 
 [wgsl]
 entry = "effect.wgsl"

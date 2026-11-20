@@ -9,6 +9,11 @@ order = 30
 intensity = "amount"
 description = "Teal in the shadows, orange in the highlights, skin held as skin, a film curve over it. The blockbuster grade, and the most requested look there is."
 
+[effect.i18n."zh-Hans"]
+name = "青橙"
+description = "阴影里的青、高光里的橙、肤色还是肤色，上面覆一条胶片曲线。大片的调色，也是被点得最多的风格。"
+category = "电影感"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -17,6 +22,9 @@ max = 100
 default = 70
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [[param]]
 key = "contrast"
@@ -27,6 +35,9 @@ default = 25
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "对比度"
+
 [[param]]
 key = "skin"
 label = "Protect skin"
@@ -35,6 +46,9 @@ max = 100
 default = 80
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "保护肤色"
 
 [wgsl]
 entry = "effect.wgsl"

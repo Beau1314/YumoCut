@@ -11,6 +11,11 @@ description = "Takes out a black background - fire, sparks, smoke, light leaks o
 
 # The level of the picture taken for black, so a lifted black, grain and a
 # compressed stream's noise go with it.
+[effect.i18n."zh-Hans"]
+name = "去除黑色"
+description = "抠掉黑色背景——黑底拍的火、火花、烟、漏光或标识——保留它的辉光作为半透明的光，不带黑边，叠在下方内容上，导出时也带透明。"
+category = "抠像"
+
 [[param]]
 key = "threshold"
 label = "Black level"
@@ -23,6 +28,9 @@ unit = "%"
 # How solid what stays is: at 100 % a glow covers what is beneath by as
 # much as it is bright, the way light adds to light; more makes the dim
 # parts more solid.
+[param.i18n."zh-Hans"]
+label = "黑电平"
+
 [[param]]
 key = "strength"
 label = "Strength"
@@ -31,6 +39,9 @@ max = 400
 default = 100
 step = 5
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "强度"
 
 [wgsl]
 entry = "effect.wgsl"

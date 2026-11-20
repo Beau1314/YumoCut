@@ -11,6 +11,11 @@ intensity = "strength"
 aliases = ["vignette"]
 description = "Darkened corners that draw the eye to the middle."
 
+[effect.i18n."zh-Hans"]
+name = "暗角"
+description = "压暗的四角把视线引向中间。"
+category = "风格化"
+
 [[param]]
 key = "strength"
 label = "Strength"
@@ -19,6 +24,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "强度"
 
 [wgsl]
 entry = "effect.wgsl"

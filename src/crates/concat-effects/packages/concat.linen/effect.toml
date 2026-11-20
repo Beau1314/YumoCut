@@ -9,6 +9,11 @@ order = 18
 intensity = "matte"
 description = "Whitewash's warm twin: the same soft matte with cream in the whites and a little gold in the middle. Interiors and morning light."
 
+[effect.i18n."zh-Hans"]
+name = "亚麻"
+description = "“粉刷白”的暖调孪生：同样柔软的哑光，白色里带奶油、中间调里带一点金。室内与晨光适用。"
+category = "日常"
+
 [[param]]
 key = "matte"
 label = "Matte"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "哑光"
+
 [[param]]
 key = "warmth"
 label = "Warmth"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "暖度"
 
 [wgsl]
 entry = "effect.wgsl"

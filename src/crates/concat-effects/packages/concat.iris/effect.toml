@@ -8,6 +8,11 @@ category = "Wipe"
 order = 11
 description = "A round opening grows from the centre until the next shot fills the frame."
 
+[effect.i18n."zh-Hans"]
+name = "光圈"
+description = "一个圆孔从中心长大，直到下一个镜头铺满画面。"
+category = "擦除"
+
 [[param]]
 key = "softness"
 label = "Softness"
@@ -16,6 +21,9 @@ min = 0
 max = 100
 step = 1
 default = 15
+
+[param.i18n."zh-Hans"]
+label = "柔和度"
 
 [transition]
 fallback = "cross-fade"

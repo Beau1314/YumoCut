@@ -10,6 +10,11 @@ intensity = "temperature"
 aliases = ["cool"]
 description = "Shifts the picture towards daylight shade."
 
+[effect.i18n."zh-Hans"]
+name = "冷调"
+description = "把画面推向白昼荫处的色温。"
+category = "色彩"
+
 [[param]]
 key = "temperature"
 label = "Temperature"
@@ -18,6 +23,9 @@ max = 11000
 default = 8500
 step = 50
 unit = "K"
+
+[param.i18n."zh-Hans"]
+label = "色温"
 
 [wgsl]
 entry = "effect.wgsl"

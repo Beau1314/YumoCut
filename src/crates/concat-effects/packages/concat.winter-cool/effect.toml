@@ -8,6 +8,11 @@ category = "Scenery"
 order = 59
 description = "Desaturated and blue, the blacks lifted to a matte wintry haze."
 
+[effect.i18n."zh-Hans"]
+name = "冬日冷调"
+description = "低饱和的蓝，黑位抬成一层冬日雾般的哑光。"
+category = "风景"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

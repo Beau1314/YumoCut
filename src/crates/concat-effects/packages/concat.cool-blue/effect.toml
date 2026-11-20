@@ -9,6 +9,11 @@ order = 32
 intensity = "chill"
 description = "Blue in the shadows and midtones, highlights and skin left neutral, contrast up. Cities at dusk."
 
+[effect.i18n."zh-Hans"]
+name = "冷蓝"
+description = "蓝进阴影与中间调，高光与肤色保持中性，对比提升。黄昏城市适用。"
+category = "电影感"
+
 [[param]]
 key = "chill"
 label = "Chill"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "冷感"
+
 [[param]]
 key = "contrast"
 label = "Contrast"
@@ -26,6 +34,9 @@ max = 100
 default = 30
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "对比度"
 
 [wgsl]
 entry = "effect.wgsl"

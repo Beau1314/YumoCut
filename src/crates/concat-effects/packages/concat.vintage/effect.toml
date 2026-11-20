@@ -9,6 +9,11 @@ order = 40
 intensity = "age"
 description = "A seventies print: matte blacks and whites, colour faded, greens gone to yellow, a soft vignette."
 
+[effect.i18n."zh-Hans"]
+name = "老照片"
+description = "七十年代的印片：哑光的黑与白、褪色的色彩、转黄的绿、一道柔暗角。"
+category = "复古"
+
 [[param]]
 key = "age"
 label = "Age"
@@ -18,6 +23,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "年代感"
+
 [[param]]
 key = "tint"
 label = "Tint"
@@ -26,6 +34,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "色调"
 
 [wgsl]
 entry = "effect.wgsl"

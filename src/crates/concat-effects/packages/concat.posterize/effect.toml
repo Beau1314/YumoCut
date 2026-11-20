@@ -11,6 +11,11 @@ intensity = "levels"
 aliases = ["posterize"]
 description = "Flat bands of colour, like a screen print."
 
+[effect.i18n."zh-Hans"]
+name = "色调分离"
+description = "一档档平坦的色带，像丝网印刷。"
+category = "风格化"
+
 [[param]]
 key = "levels"
 label = "Levels"
@@ -19,6 +24,9 @@ min = 2
 max = 8
 default = 4
 step = 1
+
+[param.i18n."zh-Hans"]
+label = "色阶"
 
 [wgsl]
 entry = "effect.wgsl"

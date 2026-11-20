@@ -9,6 +9,11 @@ order = 36
 intensity = "amount"
 description = "Muted and green-teal through the midtones, a gentle film curve, warmth only where a face is. The quiet grade of an indie film."
 
+[effect.i18n."zh-Hans"]
+name = "独立电影"
+description = "中间调里的灰绿、一条轻柔的胶片曲线，只在有脸的地方留暖。独立电影式的安静调色。"
+category = "电影感"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -17,6 +22,9 @@ max = 100
 default = 60
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [wgsl]
 entry = "effect.wgsl"

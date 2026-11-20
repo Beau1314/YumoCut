@@ -8,6 +8,11 @@ category = "Vibe"
 order = 66
 description = "A soft, hazy bloom over lifted pastel blacks."
 
+[effect.i18n."zh-Hans"]
+name = "梦幻"
+description = "提起的粉彩黑位上覆一层柔软朦胧的辉光。"
+category = "氛围"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

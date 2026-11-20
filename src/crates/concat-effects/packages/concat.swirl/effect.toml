@@ -9,6 +9,11 @@ order = 7
 shelves = ["Distortion & Glitch"]
 description = "Both shots twist round the centre like water down a drain, and the next one untwists out of the whirl."
 
+[effect.i18n."zh-Hans"]
+name = "漩涡"
+description = "两个镜头像排水口的水一样绕中心扭转，下一个再从旋涡里反着转出来。"
+category = "旋转"
+
 [[param]]
 key = "twist"
 label = "Twist"
@@ -17,6 +22,9 @@ min = 0
 max = 100
 step = 1
 default = 70
+
+[param.i18n."zh-Hans"]
+label = "扭转"
 
 [transition]
 fallback = "cross-fade"

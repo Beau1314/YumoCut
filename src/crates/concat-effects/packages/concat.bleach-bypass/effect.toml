@@ -8,6 +8,11 @@ category = "Cinematic"
 order = 51
 description = "The silver-retention film process: colour washed out, contrast pushed hard."
 
+[effect.i18n."zh-Hans"]
+name = "漂白旁路"
+description = "留银胶片工艺：色彩被洗淡，对比推得很硬。"
+category = "电影感"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

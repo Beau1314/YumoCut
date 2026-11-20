@@ -8,6 +8,11 @@ category = "Cinematic"
 order = 52
 description = "Magenta into the shadows, cyan into the light, pushed hard and neon-bright."
 
+[effect.i18n."zh-Hans"]
+name = "赛博朋克"
+description = "品红进阴影，青进亮部，推得又狠又霓虹。"
+category = "电影感"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

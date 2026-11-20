@@ -8,6 +8,11 @@ category = "Vibe"
 order = 67
 description = "Magenta and cyan pushed hard, a saturated retro-synth cast."
 
+[effect.i18n."zh-Hans"]
+name = "蒸汽波"
+description = "品红与青用力推开，复古合成器的浓重色调。"
+category = "氛围"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

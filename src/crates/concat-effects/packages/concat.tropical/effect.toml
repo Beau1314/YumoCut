@@ -8,6 +8,11 @@ category = "Scenery"
 order = 60
 description = "Saturated and bright, the water pushed teal."
 
+[effect.i18n."zh-Hans"]
+name = "热带"
+description = "饱和而明亮，海水推向青绿。"
+category = "风景"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

@@ -8,11 +8,20 @@ category = "Color"
 order = 15
 description = "The picture's levels bent along curves you draw: luma for brightness alone, then red, green and blue."
 
+[effect.i18n."zh-Hans"]
+name = "曲线"
+description = "按你描绘的曲线弯折画面层级：亮度只管明暗，其后是红、绿、蓝。"
+category = "色彩"
+
 [[param]]
 key = "luma"
 group = "Curves"
 label = "Luma"
 type = "curve"
+
+[param.i18n."zh-Hans"]
+label = "亮度"
+group = "曲线"
 
 [[param]]
 key = "red"
@@ -20,17 +29,29 @@ group = "Curves"
 label = "Red"
 type = "curve"
 
+[param.i18n."zh-Hans"]
+label = "红"
+group = "曲线"
+
 [[param]]
 key = "green"
 group = "Curves"
 label = "Green"
 type = "curve"
 
+[param.i18n."zh-Hans"]
+label = "绿"
+group = "曲线"
+
 [[param]]
 key = "blue"
 group = "Curves"
 label = "Blue"
 type = "curve"
+
+[param.i18n."zh-Hans"]
+label = "蓝"
+group = "曲线"
 
 [wgsl]
 entry = "effect.wgsl"

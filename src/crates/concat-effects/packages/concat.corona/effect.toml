@@ -11,6 +11,11 @@ intensity = "amount"
 aliases = ["corona"]
 description = "A cool blue-white corona gathered off the picture's blown highlights by a golden-angle spiral blur - built from nothing, not a port of the stock halation."
 
+[effect.i18n."zh-Hans"]
+name = "光冕"
+description = "以黄金角螺旋模糊从过曝高光中收集的一圈冷蓝白光冕——从零构建，并非移植库存光渗。"
+category = "胶片"
+
 [[param]]
 key = "threshold"
 label = "Threshold"
@@ -19,6 +24,9 @@ max = 95
 default = 60
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "阈值"
 
 [[param]]
 key = "radius"
@@ -29,6 +37,9 @@ default = 18
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "半径"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -38,6 +49,9 @@ default = 55
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "程度"
+
 [[param]]
 key = "cool"
 label = "Coolness"
@@ -46,6 +60,9 @@ max = 100
 default = 70
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "冷度"
 
 [wgsl]
 entry = "effect.wgsl"

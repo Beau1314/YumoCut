@@ -9,6 +9,11 @@ order = 12
 intensity = "amount"
 description = "Richer or greyer colour, about each pixel's own brightness."
 
+[effect.i18n."zh-Hans"]
+name = "饱和度"
+description = "围绕每个像素自身亮度的色彩浓淡。"
+category = "色彩"
+
 [[param]]
 key = "amount"
 label = "Saturation"
@@ -18,6 +23,9 @@ default = 0
 step = 1
 unit = "%"
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "饱和度"
 
 [wgsl]
 entry = "effect.wgsl"

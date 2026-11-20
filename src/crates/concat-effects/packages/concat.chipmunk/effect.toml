@@ -8,6 +8,11 @@ intensity = "pitch"
 aliases = ["chipmunk"]
 description = "Higher and squeakier."
 
+[effect.i18n."zh-Hans"]
+name = "花栗鼠"
+description = "更高、更尖。"
+category = "人声"
+
 [[param]]
 key = "pitch"
 label = "Pitch"
@@ -16,6 +21,9 @@ max = 12
 default = 7
 step = 0.5
 unit = "st"
+
+[param.i18n."zh-Hans"]
+label = "音高"
 
 [ffmpeg]
 let = [

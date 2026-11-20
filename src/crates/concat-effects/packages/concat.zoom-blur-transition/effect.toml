@@ -8,6 +8,11 @@ category = "Zoom"
 order = 15
 description = "The camera lunges into the last shot in a rush of streaks, and the next one rushes back out to meet it."
 
+[effect.i18n."zh-Hans"]
+name = "缩放模糊"
+description = "镜头在一道拖影里扑进前一镜头，下一个镜头再迎面冲出来。"
+category = "缩放"
+
 [[param]]
 key = "strength"
 label = "Strength"
@@ -16,6 +21,9 @@ min = 0
 max = 100
 step = 1
 default = 70
+
+[param.i18n."zh-Hans"]
+label = "强度"
 
 [transition]
 fallback = "cross-fade"

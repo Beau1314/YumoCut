@@ -8,6 +8,11 @@ category = "Cinematic"
 order = 53
 description = "A cool, sterile steel-and-teal grade, saturation held back."
 
+[effect.i18n."zh-Hans"]
+name = "科幻"
+description = "冷峻的无菌钢青调，饱和度收着。"
+category = "电影感"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

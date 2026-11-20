@@ -10,6 +10,11 @@ order = 51
 intensity = "glow"
 description = "Magenta in the shadows, cyan in the highlights, hard contrast, colour turned up, and the lights themselves blooming. Night streets and signage."
 
+[effect.i18n."zh-Hans"]
+name = "霓虹"
+description = "阴影里的品红、高光里的青、硬朗的对比、拉满的色彩，灯光自己在绽放。夜街与招牌。"
+category = "风格化"
+
 [[param]]
 key = "glow"
 label = "Glow"
@@ -19,6 +24,9 @@ default = 60
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "辉光"
+
 [[param]]
 key = "punch"
 label = "Punch"
@@ -27,6 +35,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "冲击"
 
 [wgsl]
 entry = "effect.wgsl"

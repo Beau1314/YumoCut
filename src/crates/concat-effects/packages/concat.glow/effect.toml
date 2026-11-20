@@ -12,6 +12,11 @@ intensity = "amount"
 aliases = ["glow"]
 description = "A soft bloom around the bright parts of the picture."
 
+[effect.i18n."zh-Hans"]
+name = "辉光"
+description = "画面明亮部分周围的一圈柔光。"
+category = "风格化"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -20,6 +25,9 @@ max = 100
 default = 45
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [wgsl]
 entry = "effect.wgsl"

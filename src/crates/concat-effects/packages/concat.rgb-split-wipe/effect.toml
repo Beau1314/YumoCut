@@ -8,6 +8,11 @@ category = "Glitch"
 order = 9
 description = "Red, green and blue tear apart through the cut, each switching shots at its own moment, and lock back together."
 
+[effect.i18n."zh-Hans"]
+name = "RGB 分离"
+description = "红绿蓝在切换点撕裂开，各自在不同的时刻换镜头，再锁回一起。"
+category = "故障"
+
 [[param]]
 key = "spread"
 label = "Spread"
@@ -16,6 +21,9 @@ min = 0
 max = 100
 step = 1
 default = 60
+
+[param.i18n."zh-Hans"]
+label = "扩散"
 
 [transition]
 fallback = "cross-fade"

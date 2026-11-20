@@ -9,6 +9,11 @@ order = 0
 aliases = ["cross-fade"]
 description = "One shot melts evenly into the next."
 
+[effect.i18n."zh-Hans"]
+name = "溶解"
+description = "一个镜头均匀地化入下一个。"
+category = "基础"
+
 [transition]
 fallback = "cross-fade"
 xfade = "fade"

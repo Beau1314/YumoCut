@@ -9,6 +9,11 @@ order = 7
 intensity = "amount"
 description = "Red, green and blue each shake on their own, so every edge fringes with colour as the frame trembles."
 
+[effect.i18n."zh-Hans"]
+name = "棱镜抖动"
+description = "红绿蓝各自抖动，画面颤动时每条边缘都镶上彩色镶边。"
+category = "抖动"
+
 [[param]]
 key = "amount"
 label = "Amount"
@@ -17,6 +22,9 @@ min = 0
 max = 100
 step = 1
 default = 50
+
+[param.i18n."zh-Hans"]
+label = "程度"
 
 [[param]]
 key = "speed"
@@ -27,6 +35,9 @@ max = 100
 step = 1
 default = 50
 
+[param.i18n."zh-Hans"]
+label = "速度"
+
 [[param]]
 key = "split"
 label = "Split"
@@ -35,6 +46,9 @@ min = 0
 max = 100
 step = 1
 default = 60
+
+[param.i18n."zh-Hans"]
+label = "分离"
 
 [wgsl]
 entry = "effect.wgsl"

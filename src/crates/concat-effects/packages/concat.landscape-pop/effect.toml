@@ -8,6 +8,11 @@ category = "Scenery"
 order = 57
 description = "Greens and blues pushed richer, the punch a travel shot wants."
 
+[effect.i18n."zh-Hans"]
+name = "鲜活风景"
+description = "绿与蓝推得更浓，旅行镜头想要的那一口劲儿。"
+category = "风景"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

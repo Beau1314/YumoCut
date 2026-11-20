@@ -9,6 +9,11 @@ order = 13
 intensity = "temperature"
 description = "The picture as if lit warmer or cooler, and turned towards magenta or green, as the eye adapts to the light."
 
+[effect.i18n."zh-Hans"]
+name = "白平衡"
+description = "让画面像被更暖或更冷的光照亮、并向品红或绿偏转，如同眼睛对光的适应。"
+category = "色彩"
+
 [[param]]
 key = "temperature"
 label = "Temperature"
@@ -19,6 +24,9 @@ step = 50
 unit = "K"
 animate = true
 
+[param.i18n."zh-Hans"]
+label = "色温"
+
 [[param]]
 key = "tint"
 label = "Tint"
@@ -28,6 +36,9 @@ default = 0
 step = 1
 unit = "%"
 animate = true
+
+[param.i18n."zh-Hans"]
+label = "色调"
 
 [wgsl]
 entry = "effect.wgsl"

@@ -9,6 +9,11 @@ order = 13
 intensity = "lift"
 description = "A matte: blacks lifted, whites eased down, contrast low, and a soft bloom in the light with cream in it. Airy and flattering."
 
+[effect.i18n."zh-Hans"]
+name = "柔光"
+description = "一层哑光：黑位抬起、白位缓收、低对比，光里带着奶油色的一圈柔光。通透又讨喜。"
+category = "日常"
+
 [[param]]
 key = "lift"
 label = "Lift"
@@ -18,6 +23,9 @@ default = 50
 step = 1
 unit = "%"
 
+[param.i18n."zh-Hans"]
+label = "提升"
+
 [[param]]
 key = "warmth"
 label = "Warmth"
@@ -26,6 +34,9 @@ max = 100
 default = 40
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "暖度"
 
 [wgsl]
 entry = "effect.wgsl"

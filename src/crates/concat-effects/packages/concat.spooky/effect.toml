@@ -9,6 +9,11 @@ order = 54
 intensity = "dread"
 description = "Drained colour, a green-cyan cast, a hard toe, and a heavy vignette. For the season."
 
+[effect.i18n."zh-Hans"]
+name = "诡谲"
+description = "抽干的色彩、青绿的色调、生硬的趾部、浓重的暗角。为这个季节准备。"
+category = "风格化"
+
 [[param]]
 key = "dread"
 label = "Dread"
@@ -17,6 +22,9 @@ max = 100
 default = 60
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "阴森"
 
 [wgsl]
 entry = "effect.wgsl"

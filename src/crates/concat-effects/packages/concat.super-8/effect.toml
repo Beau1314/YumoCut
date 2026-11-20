@@ -8,6 +8,11 @@ category = "Film"
 order = 62
 description = "Faded, warm and grainy: an old home movie run through a projector."
 
+[effect.i18n."zh-Hans"]
+name = "超 8 毫米"
+description = "褪色、温暖而多尘：经放映机放出的老家庭录像。"
+category = "胶片"
+
 [wgsl]
 entry = "effect.wgsl"
 space = "display"

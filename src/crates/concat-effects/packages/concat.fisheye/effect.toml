@@ -12,6 +12,11 @@ intensity = "strength"
 aliases = ["fisheye"]
 description = "The bulge of a very wide lens."
 
+[effect.i18n."zh-Hans"]
+name = "鱼眼"
+description = "超广角镜头的鼓起。"
+category = "变形"
+
 [[param]]
 key = "strength"
 label = "Strength"
@@ -20,6 +25,9 @@ max = 100
 default = 50
 step = 1
 unit = "%"
+
+[param.i18n."zh-Hans"]
+label = "强度"
 
 [wgsl]
 entry = "effect.wgsl"

@@ -2546,7 +2546,13 @@ fn chain_rows(chain: &[AppliedFilter]) -> (Vec<AppliedEntryData>, Vec<AppliedPar
         rows.push(AppliedEntryData {
             id: entry.id.as_str().into(),
             name: package
-                .map(|package| package.manifest.effect.name_in(&crate::i18n::current()).to_owned())
+                .map(|package| {
+                    package
+                        .manifest
+                        .effect
+                        .name_in(&crate::i18n::current())
+                        .to_owned()
+                })
                 .unwrap_or_else(|| label_of(&entry.id))
                 .into(),
             on: entry.enabled,
@@ -3030,7 +3036,13 @@ fn upgraded_effects(pairs: &[(String, String)]) -> Vec<String> {
         .map(|(old, new)| {
             let new = catalogue
                 .get(new)
-                .map(|package| package.manifest.effect.name_in(&crate::i18n::current()).to_owned())
+                .map(|package| {
+                    package
+                        .manifest
+                        .effect
+                        .name_in(&crate::i18n::current())
+                        .to_owned()
+                })
                 .unwrap_or_else(|| label_of(new));
             format!("{} → {new}", label_of(old))
         })

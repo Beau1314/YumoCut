@@ -500,7 +500,13 @@ impl Studio {
                     .effects
                     .iter()
                     .filter_map(|id| catalogue.get(id))
-                    .map(|package| package.manifest.effect.name_in(&crate::i18n::current()).to_owned())
+                    .map(|package| {
+                        package
+                            .manifest
+                            .effect
+                            .name_in(&crate::i18n::current())
+                            .to_owned()
+                    })
                     .collect();
                 VoiceCardData {
                     id: format!("style-{row}").into(),

@@ -876,15 +876,14 @@ mod tests {
         assert!(lower.candidates().is_empty());
         assert_eq!(lower.plugins[0].state, PluginState::Current);
 
+        let required_app = Version::new(Version::current().major + 1, 0, 0);
+        let required = required_app.to_string();
         let app = offer(
             release("0.2.12"),
-            vec![entry("yumo.volume", 3, 2, "0.2.13")],
+            vec![entry("yumo.volume", 3, 2, &required)],
             temp.path(),
         );
-        assert_eq!(
-            app.plugins[0].state,
-            PluginState::NeedsApp(Version::new(0, 2, 13))
-        );
+        assert_eq!(app.plugins[0].state, PluginState::NeedsApp(required_app));
         assert!(app.candidates().is_empty());
 
         let format = offer(

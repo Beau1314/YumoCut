@@ -1549,10 +1549,16 @@ fn shelves(
         if meta.id == ADJUST_ID || !keep(package) {
             continue;
         }
-        let category = if meta.category.is_empty() {
-            "Other".to_owned()
-        } else {
-            meta.category.clone()
+        // The shelf the card sits on in the interface's language: a
+        // package translated whole carries its translated shelf, so the
+        // groups the strip offers follow the interface.
+        let category = {
+            let said = meta.category_in(&crate::i18n::current());
+            if said.is_empty() {
+                "Other".to_owned()
+            } else {
+                said.to_owned()
+            }
         };
         // Shelf and package names come from the manifests in English and
         // are looked up like any other string, so a locale can carry them.
@@ -1566,8 +1572,8 @@ fn shelves(
         // The shelves are built from every package and only the entries are
         // narrowed: a strip that lost a segment because a search matched
         // nothing on it would move under the pointer as you typed.
-        let name = meta.name.clone();
-        let description = meta.description.clone();
+        let name = meta.name_in(&crate::i18n::current()).to_owned();
+        let description = meta.description_in(&crate::i18n::current()).to_owned();
         let starred = favourites.iter().any(|held| held == &meta.id);
         let shown = if view.favourites {
             starred
@@ -2383,8 +2389,8 @@ fn adjust_rows(chain: &[AppliedFilter], at: Option<f64>) -> Vec<AppliedParamData
             AppliedParamData {
                 entry: -1,
                 key: param.key.as_str().into(),
-                label: param.label.as_str().into(),
-                group: param.group.as_str().into(),
+                label: param.label_in(&crate::i18n::current()).into(),
+                group: param.group_in(&crate::i18n::current()).into(),
                 unit: param.unit.as_str().into(),
                 min: param.min as f32,
                 max: param.max as f32,
@@ -2456,7 +2462,7 @@ fn chain_colours(
                     ColourKnobData {
                         entry: index as i32,
                         key: param.key.as_str().into(),
-                        label: param.label.as_str().into(),
+                        label: param.label_in(&crate::i18n::current()).into(),
                         value: unpacked(value),
                         automatic: can_automatic && unpacked(value).alpha() == 0,
                         can_automatic,
@@ -2495,7 +2501,7 @@ fn chain_choices(chain: &[AppliedFilter]) -> Vec<ChainChoiceData> {
                 .enumerate()
                 .map(|(at, number)| {
                     param
-                        .labels
+                        .labels_in(&crate::i18n::current())
                         .get(at)
                         .cloned()
                         .unwrap_or_else(|| format!("{number}"))
@@ -2505,7 +2511,7 @@ fn chain_choices(chain: &[AppliedFilter]) -> Vec<ChainChoiceData> {
             choices.push(ChainChoiceData {
                 entry: index as i32,
                 key: param.key.as_str().into(),
-                label: param.label.as_str().into(),
+                label: param.label_in(&crate::i18n::current()).into(),
                 options: ModelRc::new(VecModel::from(options)),
                 values: ModelRc::new(VecModel::from(
                     param
@@ -2540,7 +2546,7 @@ fn chain_rows(chain: &[AppliedFilter]) -> (Vec<AppliedEntryData>, Vec<AppliedPar
         rows.push(AppliedEntryData {
             id: entry.id.as_str().into(),
             name: package
-                .map(|package| package.manifest.effect.name.clone())
+                .map(|package| package.manifest.effect.name_in(&crate::i18n::current()).to_owned())
                 .unwrap_or_else(|| label_of(&entry.id))
                 .into(),
             on: entry.enabled,
@@ -2594,7 +2600,7 @@ fn chain_rows(chain: &[AppliedFilter]) -> (Vec<AppliedEntryData>, Vec<AppliedPar
             knobs.push(AppliedParamData {
                 entry: index as i32,
                 key: param.key.as_str().into(),
-                label: param.label.as_str().into(),
+                label: param.label_in(&crate::i18n::current()).into(),
                 group: "".into(),
                 unit: param.unit.as_str().into(),
                 min: param.min as f32,
@@ -2657,8 +2663,8 @@ fn grading_rows(
                 wheels.push(WheelData {
                     entry,
                     key: param.key.as_str().into(),
-                    label: param.label.as_str().into(),
-                    group: param.group.as_str().into(),
+                    label: param.label_in(&crate::i18n::current()).into(),
+                    group: param.group_in(&crate::i18n::current()).into(),
                     x: value(&x, 0.0) as f32,
                     y: value(&y, 0.0) as f32,
                     master: value(&m, param.default) as f32,
@@ -2685,8 +2691,8 @@ fn grading_rows(
                     CurveData {
                         entry,
                         key: param.key.as_str().into(),
-                        label: param.label.as_str().into(),
-                        group: param.group.as_str().into(),
+                        label: param.label_in(&crate::i18n::current()).into(),
+                        group: param.group_in(&crate::i18n::current()).into(),
                         points: ModelRc::default(),
                         path: grading::curve_path(params, &param.key).into(),
                     },
@@ -3024,7 +3030,7 @@ fn upgraded_effects(pairs: &[(String, String)]) -> Vec<String> {
         .map(|(old, new)| {
             let new = catalogue
                 .get(new)
-                .map(|package| package.manifest.effect.name.clone())
+                .map(|package| package.manifest.effect.name_in(&crate::i18n::current()).to_owned())
                 .unwrap_or_else(|| label_of(new));
             format!("{} → {new}", label_of(old))
         })

@@ -95,7 +95,7 @@ jobs:
           TAG: ${{ needs.check.outputs.tag }}
         run: |
           set -euo pipefail
-          PYTHONPATH=source python3 -m unittest scripts.test_plugin_updates -v
+          (cd source && PYTHONPATH=. python3 -m unittest scripts.test_plugin_updates -v)
           python3 source/scripts/plugin_updates.py \
             --repository Beau1314/YumoCut \
             --tag "$TAG" \

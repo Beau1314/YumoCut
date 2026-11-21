@@ -7,13 +7,8 @@ id = "yumo.volume"
 name = "Yumo Volume"
 kind = "audio"
 category = "Volume"
-version = 4
+version = 5
 description = "A minimal registered audio effect for verified YumoCut plugin updates."
-
-[effect.i18n."zh-Hans"]
-name = "音量"
-category = "音量"
-description = "一个用于验证 YumoCut 插件更新的最小登记音频效果。"
 
 [ffmpeg]
 chain = "volume=1"
